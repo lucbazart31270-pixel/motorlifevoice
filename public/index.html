@@ -26,7 +26,7 @@
       border-radius: 15px;
       padding: 40px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 500px;
+      max-width: 600px;
       width: 100%;
     }
 
@@ -85,6 +85,30 @@
       cursor: not-allowed;
     }
 
+    .btn-danger {
+      background: #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-success {
+      background: #27ae60;
+    }
+
+    .btn-success:hover {
+      background: #229954;
+    }
+
+    .btn-warning {
+      background: #f39c12;
+    }
+
+    .btn-warning:hover {
+      background: #e67e22;
+    }
+
     #status {
       text-align: center;
       padding: 15px;
@@ -96,16 +120,29 @@
       min-height: 30px;
     }
 
-    .users-list {
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .controls button {
+      margin-bottom: 0;
+    }
+
+    .section {
       margin-top: 30px;
       padding: 20px;
       background: #f9f9f9;
       border-radius: 8px;
+      border-left: 4px solid #667eea;
     }
 
-    .users-list h3 {
+    .section h3 {
       color: #333;
       margin-bottom: 15px;
+      font-size: 18px;
     }
 
     .user-item {
@@ -119,29 +156,42 @@
       border-left: 4px solid #667eea;
     }
 
+    .user-info {
+      flex: 1;
+    }
+
     .user-name {
       font-weight: bold;
       color: #333;
+      display: block;
     }
 
-    .call-btn {
-      background: #28a745;
-      padding: 8px 16px;
-      font-size: 14px;
+    .user-distance {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .user-actions button {
       width: auto;
-      margin: 0;
+      padding: 8px 12px;
+      margin-bottom: 0;
+      font-size: 13px;
     }
 
-    .call-btn:hover {
-      background: #218838;
+    .call-incoming {
+      background: #fff3cd;
+      border-left-color: #f39c12;
     }
 
-    .call-btn.active {
-      background: #dc3545;
-    }
-
-    .call-btn.active:hover {
-      background: #c82333;
+    .call-active {
+      background: #d4edda;
+      border-left-color: #27ae60;
     }
 
     .stats {
@@ -152,11 +202,37 @@
       font-size: 14px;
       color: #1976d2;
     }
+
+    .stats div {
+      margin: 5px 0;
+    }
+
+    .incoming-call {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #f39c12;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .incoming-call button {
+      width: auto;
+      margin: 5px 5px 5px 0;
+      padding: 8px 15px;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎤 Voice Chat WebRTC</h1>
+    <h1>🎤 Voice Chat</h1>
 
     <div class="form-group">
       <label for="username">Ton Pseudonyme :</label>
@@ -164,20 +240,42 @@
     </div>
 
     <button onclick="connectToServer()">Se Connecter</button>
-    <button onclick="startVoiceChat()" id="startBtn" disabled>Activer Micro</button>
-    <button onclick="stopVoiceChat()" id="stopBtn" disabled>Désactiver Micro</button>
+    
+    <div class="controls">
+      <button onclick="startVoiceChat()" id="startBtn" disabled>🔊 Micro ON</button>
+      <button onclick="stopVoiceChat()" id="stopBtn" disabled class="btn-danger">🔇 Micro OFF</button>
+    </div>
 
     <div id="status">En attente...</div>
 
-    <div class="users-list" id="usersContainer" style="display: none;">
-      <h3>👥 Utilisateurs en ligne :</h3>
-      <div id="usersList"></div>
+    <!-- SECTION PROXIMITÉ -->
+    <div class="section" id="proximitySection" style="display: none;">
+      <h3>📍 Chat de Proximité (Auto)</h3>
+      <div id="nearbyList"></div>
     </div>
 
+    <!-- SECTION APPELS MANUELS -->
+    <div class="section" id="callSection" style="display: none;">
+      <h3>📞 Appels Directs (Manuel)</h3>
+      <div id="allUsersList"></div>
+    </div>
+
+    <!-- STATISTIQUES -->
     <div class="stats" id="stats" style="display: none;">
       <div>🎤 Micro : <span id="micStatus">Inactif</span></div>
-      <div>📱 Appels actifs : <span id="callCount">0</span></div>
+      <div>📍 Position : <span id="posStatus">En attente GPS...</span></div>
+      <div>🔊 Connexions : <span id="callCount">0</span></div>
+      <div>📞 Appels en attente : <span id="incomingCount">0</span></div>
     </div>
+  </div>
+
+  <!-- NOTIFICATION APPEL ENTRANT -->
+  <div class="incoming-call hidden" id="incomingCallNotif">
+    <div style="font-size: 18px; margin-bottom: 15px;">
+      📞 <span id="callerName"></span> t'appelle !
+    </div>
+    <button onclick="acceptCall()" class="btn-success">Accepter</button>
+    <button onclick="rejectCall()" class="btn-danger">Refuser</button>
   </div>
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
@@ -200,16 +298,72 @@
       ]
     };
 
+    const PROXIMITE_DISTANCE = 100; // 100 mètres
+
     // ========== VARIABLES GLOBALES ==========
     let socket;
     let myId;
     let myUsername;
+    let myPosition = null;
     let localStream;
     let peers = {}; // { userId: RTCPeerConnection }
     let remoteAudios = {}; // { userId: HTMLAudioElement }
+    let usersNearby = {}; // Chat de proximité
+    let allUsers = {}; // Tous les utilisateurs
+    let incomingCalls = {}; // { userId: { username, from: userId } }
+    let pendingCalls = {}; // Appels en attente
+    let activeCallsWith = new Set(); // Appels actifs
+    
     const statusEl = document.getElementById("status");
     const startBtn = document.getElementById("startBtn");
     const stopBtn = document.getElementById("stopBtn");
+
+    // ========== GEOLOCALISATION ==========
+    function startGeolocation() {
+      console.log("📍 Démarrage géolocalisation...");
+      
+      if (!navigator.geolocation) {
+        statusEl.innerText = "❌ Géolocalisation non supportée";
+        return;
+      }
+
+      navigator.geolocation.watchPosition(
+        (position) => {
+          myPosition = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          console.log("✅ Position mise à jour :", myPosition);
+          document.getElementById("posStatus").innerText = 
+            `${myPosition.lat.toFixed(4)}, ${myPosition.lng.toFixed(4)}`;
+          
+          if (socket && socket.connected) {
+            socket.emit("updatePosition", myPosition);
+          }
+        },
+        (error) => {
+          console.error("❌ Erreur GPS :", error);
+          statusEl.innerText = "❌ Erreur GPS : " + error.message;
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    function getDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return Math.round(R * c);
+    }
 
     // ========== CONNEXION SERVEUR ==========
     function connectToServer() {
@@ -221,6 +375,7 @@
       }
 
       statusEl.innerText = "⏳ Connexion au serveur...";
+      startGeolocation();
 
       socket = io();
 
@@ -235,35 +390,66 @@
         myId = userId;
         console.log("📝 Enregistré avec l'ID :", myId);
         statusEl.innerText = "✅ Enregistré - Active ton micro !";
+        document.getElementById("stats").style.display = "block";
       });
 
       socket.on("usersList", ({ users }) => {
-        console.log("👥 Liste des users :", users);
-        updateUsersList(users);
+        console.log("👥 Liste reçue :", users);
+        updateAllUsers(users);
+        updateNearbyUsers(users);
       });
 
       socket.on("userJoined", ({ userId, username }) => {
         console.log(`🟢 ${username} a rejoint !`);
-        statusEl.innerText = `🟢 ${username} a rejoint !`;
         socket.emit("getUsersList");
       });
 
       socket.on("userLeft", ({ userId, username }) => {
         console.log(`🔴 ${username} s'est déconnecté`);
-        statusEl.innerText = `🔴 ${username} s'est déconnecté`;
-        
-        if (peers[userId]) {
-          peers[userId].close();
-          delete peers[userId];
-        }
-        if (remoteAudios[userId]) {
-          remoteAudios[userId].pause();
-          remoteAudios[userId].srcObject = null;
-          document.body.removeChild(remoteAudios[userId]);
-          delete remoteAudios[userId];
-        }
-        
+        disconnectUser(userId);
+        delete allUsers[userId];
+        delete usersNearby[userId];
         socket.emit("getUsersList");
+      });
+
+      socket.on("userPositionUpdate", ({ userId, username, lat, lng }) => {
+        console.log(`📍 Position de ${username} mise à jour`);
+        
+        if (allUsers[userId]) {
+          allUsers[userId].position = { lat, lng };
+        }
+        
+        if (myPosition) {
+          const distance = getDistance(myPosition.lat, myPosition.lng, lat, lng);
+          
+          if (distance <= PROXIMITE_DISTANCE) {
+            // À proximité
+            if (!usersNearby[userId]) {
+              usersNearby[userId] = { username, lat, lng, distance, type: "proximity" };
+              
+              // Auto-appel si micro est activé
+              if (localStream && !peers[userId]) {
+                console.log(`📞 ${username} à proximité ! Appel auto...`);
+                callUserAuto(userId);
+              }
+            } else {
+              usersNearby[userId].distance = distance;
+            }
+            updateNearbyList();
+          } else {
+            // Plus à proximité
+            if (usersNearby[userId]) {
+              console.log(`📍 ${username} plus à proximité (${distance}m)`);
+              
+              // Ne couper que si c'est un appel AUTO
+              if (usersNearby[userId].type === "proximity") {
+                disconnectUser(userId);
+              }
+              delete usersNearby[userId];
+              updateNearbyList();
+            }
+          }
+        }
       });
 
       socket.on("signal", async ({ from, data }) => {
@@ -272,29 +458,36 @@
         let pc = peers[from];
         
         if (!pc) {
-          console.log("📞 Pas de peer pour", from, "en création...");
-          pc = createPeerConnection(from);
+          pc = createPeerConnection(from, false); // false = pas auto
         }
 
         try {
           if (data.type === "offer") {
-            console.log("📥 OFFER - setRemoteDescription...");
+            console.log("📥 OFFER reçue");
             await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            
+            // Vérifier si c'est un appel entrant
+            if (!activeCallsWith.has(from)) {
+              console.log("📞 APPEL ENTRANT de", from);
+              incomingCalls[from] = data.incoming;
+              showIncomingCall(from, data.incomingUsername);
+              updateStats();
+              return; // Attendre la réponse de l'utilisateur
+            }
+            
             const answer = await pc.createAnswer();
-            console.log("📢 Answer créée");
             await pc.setLocalDescription(answer);
-            console.log("📤 Envoi answer...");
             socket.emit("signal", { to: from, data: { type: "answer", answer } });
           } else if (data.type === "answer") {
-            console.log("📥 ANSWER - setRemoteDescription...");
+            console.log("📥 ANSWER reçue");
             await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            activeCallsWith.add(from);
             console.log("✅ Connection établie avec", from);
+            updateAllUsersList();
+            updateStats();
           } else if (data.type === "candidate") {
-            console.log("❄️ ICE candidate de", from);
             if (pc.remoteDescription) {
               await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-            } else {
-              console.warn("⚠️ RemoteDescription pas encore prêt");
             }
           }
         } catch (err) {
@@ -312,9 +505,8 @@
 
     // ========== MICRO ==========
     async function startVoiceChat() {
-      const statusEl = document.getElementById("status");
       try {
-        console.log("🎤 Demande d'accès au micro...");
+        console.log("🎤 Demande micro...");
         localStream = await navigator.mediaDevices.getUserMedia({ 
           audio: { 
             echoCancellation: true, 
@@ -323,15 +515,21 @@
           },
           video: false 
         });
-        console.log("✅ Micro activé ! Tracks :", localStream.getAudioTracks().length);
+        console.log("✅ Micro activé !");
         statusEl.innerText = "✅ Micro activé";
         document.getElementById("micStatus").innerText = "Actif 🎤";
         startBtn.disabled = true;
         stopBtn.disabled = false;
+        
+        // Appeler automatiquement les users à proximité
+        Object.keys(usersNearby).forEach(userId => {
+          if (!peers[userId]) {
+            callUserAuto(userId);
+          }
+        });
       } catch (err) {
         statusEl.innerText = "❌ Erreur micro : " + err.message;
-        console.error("❌ Erreur micro :", err);
-        throw err;
+        console.error("❌ Erreur :", err);
       }
     }
 
@@ -344,105 +542,67 @@
         document.getElementById("micStatus").innerText = "Inactif";
         startBtn.disabled = false;
         stopBtn.disabled = true;
+        
+        // Couper toutes les connexions
+        Object.keys(peers).forEach(userId => {
+          peers[userId].close();
+          delete peers[userId];
+        });
+        activeCallsWith.clear();
+        updateAllUsersList();
+        updateNearbyList();
+        updateStats();
       }
     }
 
     // ========== WEBRTC ==========
-    function createPeerConnection(remoteId) {
-      console.log("🔧 Création PeerConnection pour", remoteId);
+    function createPeerConnection(remoteId, isInitiator = false) {
+      console.log("🔧 Création PeerConnection pour", remoteId, "initiateur:", isInitiator);
       const pc = new RTCPeerConnection(rtcConfig);
 
       if (localStream) {
-        console.log("✅ localStream existe, tracks :", localStream.getAudioTracks().length);
-        localStream.getAudioTracks().forEach((track, i) => {
-          console.log("➕ Ajout track audio #" + i + " pour", remoteId);
+        localStream.getAudioTracks().forEach((track) => {
           pc.addTrack(track, localStream);
         });
-      } else {
-        console.error("❌ localStream n'existe pas !");
       }
 
       pc.onicecandidate = (event) => {
         if (event.candidate) {
-          console.log("❄️ ICE candidate pour", remoteId);
           socket.emit("signal", { to: remoteId, data: { type: "candidate", candidate: event.candidate } });
         }
       };
 
       pc.ontrack = (event) => {
-        console.log("🔊 ONTRACK - Audio reçu de", remoteId);
+        console.log("🔊 Audio reçu de", remoteId);
         if (!remoteAudios[remoteId]) {
           const audio = new Audio();
           audio.srcObject = event.streams[0];
           audio.play().catch(err => console.warn("Erreur play :", err));
           document.body.appendChild(audio);
           remoteAudios[remoteId] = audio;
-          console.log("🔊 Lecteur audio créé pour", remoteId);
+          console.log("🔊 Audio actif pour", remoteId);
         }
       };
 
       pc.onconnectionstatechange = () => {
-        console.log("🔌 Connection state :", pc.connectionState);
+        console.log(`📊 État connexion ${remoteId}:`, pc.connectionState);
+        if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+          disconnectUser(remoteId);
+        }
       };
 
       peers[remoteId] = pc;
       return pc;
     }
 
-    async function callUser(userId) {
-      console.log("📞 Appel à", userId);
+    async function callUserAuto(userId) {
+      console.log("📞 Appel auto à", userId);
       
       if (!localStream) {
-        statusEl.innerText = "❌ Active ton micro d'abord !";
+        console.warn("❌ Pas de micro !");
         return;
       }
 
       let pc = peers[userId];
       if (!pc) {
-        pc = createPeerConnection(userId);
-      }
-
-      try {
-        console.log("📞 Création OFFER pour", userId);
-        const offer = await pc.createOffer({
-          offerToReceiveAudio: true
-        });
-        console.log("📢 Offer créée pour", userId);
-        await pc.setLocalDescription(offer);
-        console.log("📤 Sending offer...");
-        socket.emit("signal", { to: userId, data: { type: "offer", offer } });
-      } catch (err) {
-        console.error("❌ Erreur création offer :", err);
-      }
-    }
-
-    // ========== UI ==========
-    function updateUsersList(users) {
-      const container = document.getElementById("usersContainer");
-      const list = document.getElementById("usersList");
-      list.innerHTML = "";
-
-      const otherUsers = users.filter(u => u.id !== myId);
-
-      if (otherUsers.length === 0) {
-        list.innerHTML = "<p style='color: #999;'>Aucun autre utilisateur en ligne</p>";
-        container.style.display = "none";
-        return;
-      }
-
-      container.style.display = "block";
-      otherUsers.forEach(user => {
-        const div = document.createElement("div");
-        div.className = "user-item";
-        div.innerHTML = `
-          <span class="user-name">${user.username}</span>
-          <button class="call-btn" onclick="callUser('${user.id}')">Appeler</button>
-        `;
-        list.appendChild(div);
-      });
-
-      document.getElementById("callCount").innerText = Object.keys(peers).length;
-    }
-  </script>
-</body>
-</html>
+        pc = createPeerConnection(userId,
