@@ -2,14 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>MotorVoice</title>
+  <title>MotorVoice - Proximité vocale</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #111;
       color: white;
       text-align: center;
-      padding-top: 50px;
+      padding-top: 30px;
     }
     button {
       padding: 15px 30px;
@@ -21,31 +21,111 @@
     }
     #startBtn { background: #4CAF50; color: white; }
     #stopBtn { background: #f44336; color: white; }
+    #players {
+      margin-top: 30px;
+      text-align: left;
+      display: inline-block;
+    }
+    .player {
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 6px;
+      background: #222;
+    }
+    .in-range { border-left: 4px solid #4CAF50; }
+    .out-range { border-left: 4px solid #555; opacity: 0.5; }
   </style>
 </head>
 <body>
-  <h1>MotorVoice</h1>
-  <p>Connexion en direct</p>
-  <button id="startBtn">Démarrer</button>
-  <button id="stopBtn">Arrêter</button>
+  <h1>🎙️ MotorVoice</h1>
+  <p id="status">Non connecté au micro</p>
+  <button id="startBtn">🎤 Démarrer le micro</button>
+  <button id="stopBtn">🛑 Arrêter</button>
 
+  <div id="players"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script>
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + window.location.host);
+    const socket = io();
 
-    ws.onopen = () => console.log('Connecté au serveur');
-    ws.onmessage = (event) => console.log('Message reçu:', event.data);
-    ws.onerror = (err) => console.log('Erreur WebSocket:', err);
-    ws.onclose = () => console.log('Connexion fermée');
+    let mediaStream = null;
+    let mediaRecorder = null;
+    const playersInRange = {}; // { id: true/false }
 
-    document.getElementById('startBtn').onclick = () => {
-      console.log('Bouton Démarrer cliqué');
-      ws.send('start');
+    const statusEl = document.getElementById('status');
+    const playersEl = document.getElementById('players');
+
+    socket.on('connect', () => {
+      statusEl.textContent = 'Connecté au serveur (ID: ' + socket.id + ')';
+      console.log('Connecté avec ID:', socket.id);
+    });
+
+    // --- Démarrer le micro ---
+    document.getElementById('startBtn').onclick = async () => {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            // On envoie le blob audio au serveur
+            const reader = new FileReader();
+            reader.onload = () => {
+              socket.emit('voice', reader.result);
+            };
+            reader.readAsArrayBuffer(event.data);
+          }
+        };
+
+        mediaRecorder.start(250); // envoie un chunk audio toutes les 250ms
+        statusEl.textContent = '🎤 Micro actif';
+        console.log('Micro démarré');
+      } catch (err) {
+        console.error('Erreur accès micro:', err);
+        statusEl.textContent = 'Erreur: impossible d\'accéder au micro';
+      }
     };
 
+    // --- Arrêter le micro ---
     document.getElementById('stopBtn').onclick = () => {
-      console.log('Bouton Arrêter cliqué');
-      ws.send('stop');
+      if (mediaRecorder) {
+        mediaRecorder.stop();
+      }
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+      statusEl.textContent = 'Micro arrêté';
+      console.log('Micro arrêté');
+    };
+
+    // --- Réception de la voix des autres joueurs à proximité ---
+    socket.on('voice', (data) => {
+      const audioBlob = new Blob([data.audio], { type: 'audio/webm' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play().catch(e => console.log('Erreur lecture audio:', e));
+    });
+
+    // --- Mise à jour de la proximité (affichage) ---
+    socket.on('proximity', (data) => {
+      playersInRange[data.id] = data.inRange;
+      renderPlayers();
+    });
+
+    function renderPlayers() {
+      playersEl.innerHTML = '<h3>Joueurs proches :</h3>';
+      for (const id in playersInRange) {
+        const div = document.createElement('div');
+        div.className = 'player ' + (playersInRange[id] ? 'in-range' : 'out-range');
+        div.textContent = `Joueur ${id.substring(0, 6)} - ${playersInRange[id] ? '🟢 À portée' : '⚫ Hors portée'}`;
+        playersEl.appendChild(div);
+      }
+    }
+
+    // --- Pour test manuel : envoyer une position fictive ---
+    // (À remplacer par les vraies positions envoyées par le mod BeamMP)
+    window.sendPosition = (x, y, z) => {
+      socket.emit('position', { x, y, z, name: 'Test' });
     };
   </script>
 </body>
