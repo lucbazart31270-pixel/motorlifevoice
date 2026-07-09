@@ -1,235 +1,256 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Chat Vocal</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #1e1e2f;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-  }
-  #joinScreen input {
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: none;
-    margin-bottom: 10px;
-  }
-  #joinScreen button, #chatScreen button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: none;
-    background: #4CAF50;
-    color: white;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  #joinScreen button:hover, #chatScreen button:hover {
-    background: #45a049;
-  }
-  #muteBtn.muted {
-    background: #e74c3c;
-  }
-  #muteBtn.muted:hover {
-    background: #c0392b;
-  }
-  #chatScreen {
-    display: none;
-    text-align: center;
-  }
-  #playersList {
-    margin-top: 20px;
-    list-style: none;
-    padding: 0;
-    min-width: 250px;
-  }
-  #playersList li {
-    background: #2c2c3e;
-    margin: 5px 0;
-    padding: 8px 15px;
-    border-radius: 5px;
-  }
-  #status {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #aaa;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Vocal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .content {
+      padding: 30px 20px;
+    }
+
+    #joinScreen {
+      display: block;
+    }
+
+    #chatScreen {
+      display: none;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.muted {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    }
+
+    #playersList {
+      list-style: none;
+      margin-top: 20px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #playersList li {
+      padding: 10px;
+      margin: 5px 0;
+      background: white;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    #myName {
+      color: #667eea;
+      font-size: 14px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #status {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .button-group button {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>🎤 Chat Vocal</h1>
+      <p id="status">En attente...</p>
+    </div>
 
-<div id="joinScreen">
-  <h1>🎤 Chat Vocal</h1>
-  <input type="text" id="nameInput" placeholder="Entre ton nom" maxlength="20"><br>
-  <button id="joinBtn">Rejoindre</button>
-</div>
+    <div class="content">
+      <!-- ÉCRAN DE CONNEXION -->
+      <div id="joinScreen">
+        <h2 style="margin-bottom: 20px; color: #333;">Rejoins le chat</h2>
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="nameInput" 
+            placeholder="Ton pseudo..." 
+            autocomplete="off"
+          >
+        </div>
+        <button id="joinBtn">Rejoindre 🚀</button>
+      </div>
 
-<div id="chatScreen">
-  <h1>✅ Connecté au chat vocal</h1>
-  <p id="myName"></p>
-  <button id="muteBtn">🔊 Micro actif (clique pour couper)</button>
-  <p id="status">Micro en attente...</p>
-  <h3>Joueurs connectés :</h3>
-  <ul id="playersList"></ul>
-</div>
+      <!-- ÉCRAN DU CHAT -->
+      <div id="chatScreen">
+        <div id="myName"></div>
+        
+        <div class="button-group">
+          <button id="muteBtn">🔊 Micro actif</button>
+        </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io();
-  let myName = "";
-  let localStream = null;
-  let isMuted = false;
-  const peers = {};
+        <h3 style="margin-bottom: 10px; color: #333;">Joueurs connectés :</h3>
+        <ul id="playersList"></ul>
+      </div>
+    </div>
+  </div>
 
-  const rtcConfig = {
-    iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-  };
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let myName = "";
+    let localStream = null;
+    let isMuted = false;
+    const peers = {};
 
-  function joinChat() {
-    const input = document.getElementById("nameInput");
-    const name = input.value.trim();
+    const rtcConfig = {
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    };
 
-    if (name === "") {
-      alert("Merci d'entrer un nom !");
-      return;
-    }
+    function joinChat() {
+      const input = document.getElementById("nameInput");
+      const name = input.value.trim();
 
-    myName = name;
-    socket.emit("join", { name: name });
+      if (name === "") {
+        alert("Merci d'entrer un nom !");
+        return;
+      }
 
-    document.getElementById("joinScreen").style.display = "none";
-    document.getElementById("chatScreen").style.display = "block";
-    document.getElementById("myName").innerText = "Tu es connecté en tant que : " + name;
+      myName = name;
 
-    startVoiceChat();
-  }
+      document.getElementById("joinScreen").style.display = "none";
+      document.getElementById("chatScreen").style.display = "block";
+      document.getElementById("myName").innerText = "Tu es connecté en tant que : " + name;
 
-  document.getElementById("joinBtn").addEventListener("click", joinChat);
-  document.getElementById("nameInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") joinChat();
-  });
-
-  document.getElementById("muteBtn").addEventListener("click", function() {
-    isMuted = !isMuted;
-    if (localStream) {
-      localStream.getAudioTracks().forEach(track => {
-        track.enabled = !isMuted;
+      // D'ABORD démarrer le micro, PUIS rejoindre
+      startVoiceChat().then(() => {
+        socket.emit("join", { name: name });
       });
     }
-    const btn = document.getElementById("muteBtn");
-    if (isMuted) {
-      btn.innerText = "🔇 Micro coupé (clique pour activer)";
-      btn.classList.add("muted");
-    } else {
-      btn.innerText = "🔊 Micro actif (clique pour couper)";
-      btn.classList.remove("muted");
-    }
-  });
 
-  socket.on("playersUpdate", (players) => {
-    const list = document.getElementById("playersList");
-    list.innerHTML = "";
-    players.forEach((p) => {
-      const li = document.createElement("li");
-      li.innerText = "🎮 " + p.name + (p.id === socket.id ? " (toi)" : "");
-      list.appendChild(li);
+    document.getElementById("joinBtn").addEventListener("click", joinChat);
+    document.getElementById("nameInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") joinChat();
     });
-  });
 
-  // === MICRO ===
-  async function startVoiceChat() {
-    const statusEl = document.getElementById("status");
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      statusEl.innerText = "Micro activé ✅";
-    } catch (err) {
-      statusEl.innerText = "Erreur d'accès au micro ❌ : " + err.message;
-      console.error(err);
-      return;
-    }
-  }
-
-  // === WEBRTC : gestion des connexions entre joueurs ===
-
-  function createPeerConnection(remoteId) {
-    const pc = new RTCPeerConnection(rtcConfig);
-
-    if (localStream) {
-      localStream.getTracks().forEach(track => {
-        pc.addTrack(track, localStream);
-      });
-    }
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("signal", {
-          to: remoteId,
-          data: { type: "candidate", candidate: event.candidate }
+    document.getElementById("muteBtn").addEventListener("click", function() {
+      isMuted = !isMuted;
+      if (localStream) {
+        localStream.getAudioTracks().forEach(track => {
+          track.enabled = !isMuted;
         });
       }
-    };
-
-    pc.ontrack = (event) => {
-      let audioEl = document.getElementById("audio-" + remoteId);
-      if (!audioEl) {
-        audioEl = document.createElement("audio");
-        audioEl.id = "audio-" + remoteId;
-        audioEl.autoplay = true;
-        document.body.appendChild(audioEl);
+      const btn = document.getElementById("muteBtn");
+      if (isMuted) {
+        btn.innerText = "🔇 Micro coupé";
+        btn.classList.add("muted");
+      } else {
+        btn.innerText = "🔊 Micro actif";
+        btn.classList.remove("muted");
       }
-      audioEl.srcObject = event.streams[0];
-    };
+    });
 
-    peers[remoteId] = pc;
-    return pc;
-  }
+    socket.on("playersUpdate", (players) => {
+      const list = document.getElementById("playersList");
+      list.innerHTML = "";
+      players.forEach((p) => {
+        const li = document.createElement("li");
+        li.innerText = "🎮 " + p.name + (p.id === socket.id ? " (toi)" : "");
+        list.appendChild(li);
+      });
+    });
 
-  socket.on("newPlayer", async ({ id }) => {
-    if (id === socket.id) return;
-    const pc = createPeerConnection(id);
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    socket.emit("signal", { to: id, data: { type: "offer", offer } });
-  });
-
-  socket.on("signal", async ({ from, data }) => {
-    let pc = peers[from];
-    if (!pc) {
-      pc = createPeerConnection(from);
-    }
-
-    if (data.type === "offer") {
-      await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.emit("signal", { to: from, data: { type: "answer", answer } });
-    } else if (data.type === "answer") {
-      await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-    } else if (data.type === "candidate") {
+    // === MICRO - PRIORITÉ ===
+    async function startVoiceChat() {
+      const statusEl = document.getElementById("status");
       try {
-        await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-      } catch (e) {
-        console.error("Erreur ICE candidate:", e);
-      }
-    }
-  });
-
-  socket.on("playerLeft", ({ id }) => {
-    if (peers[id]) {
-      peers[id].close();
-      delete peers[id];
-    }
-    const audioEl = document.getElementById("audio-" + id);
-    if (audioEl) audioEl.remove();
-  });
-</script>
-</body>
-</html>
+        localStream = await navigator.mediaDevices.getUserMedia({ 
+          audio: { echoCancellation: true, noiseSuppression: true },
+          video: false 
+        });
+        statusEl.innerText = "✅ Micro activé";
+        console.log("✅ Micro prêt");
+      } catch (
