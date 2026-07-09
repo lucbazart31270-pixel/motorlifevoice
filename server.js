@@ -15,11 +15,30 @@ io.on("connection", (socket) => {
   console.log("🔌 Connecté (ID) : " + socket.id);
 
   socket.on("join", (data) => {
-    players[socket.id] = { name: data.name };
+    players[socket.id] = { name: data.name, id: socket.id };
     console.log("🎤 Joueur connecté : " + data.name);
-
-    // Envoie la liste mise à jour à TOUT LE MONDE
     io.emit("playersUpdate", Object.values(players));
+  });
+
+  socket.on("voiceReady", () => {
+    // Prévenir les autres joueurs déjà connectés qu'un nouveau est prêt en vocal
+    for (const id in players) {
+      if (id !== socket.id) {
+        socket.to(id).emit("newPeer", { id: socket.id });
+      }
+    }
+  });
+
+  socket.on("offer", ({ to, offer }) => {
+    socket.to(to).emit("offer", { from: socket.id, offer });
+  });
+
+  socket.on("answer", ({ to, answer }) => {
+    socket.to(to).emit("answer", { from: socket.id, answer });
+  });
+
+  socket.on("iceCandidate", ({ to, candidate }) => {
+    socket.to(to).emit("iceCandidate", { from: socket.id, candidate });
   });
 
   socket.on("disconnect", () => {
@@ -27,6 +46,7 @@ io.on("connection", (socket) => {
       console.log("❌ Déconnecté : " + players[socket.id].name);
       delete players[socket.id];
       io.emit("playersUpdate", Object.values(players));
+      io.emit("removePeer", { id: socket.id });
     }
   });
 });
