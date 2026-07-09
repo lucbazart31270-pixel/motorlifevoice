@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Vocal</title>
+  <title>Voice Chat WebRTC</title>
   <style>
     * {
       margin: 0;
@@ -12,62 +12,52 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
       padding: 20px;
     }
 
     .container {
-      width: 100%;
-      max-width: 400px;
       background: white;
       border-radius: 15px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
     }
 
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
+    h1 {
       text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      font-size: 28px;
     }
 
-    .header h1 {
-      font-size: 24px;
-      margin-bottom: 5px;
+    .form-group {
+      margin-bottom: 20px;
     }
 
-    .content {
-      padding: 30px 20px;
-    }
-
-    #joinScreen {
+    label {
       display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: bold;
     }
 
-    #chatScreen {
-      display: none;
-    }
-
-    .input-group {
-      margin-bottom: 15px;
-    }
-
-    input {
+    input[type="text"] {
       width: 100%;
       padding: 12px;
-      border: 2px solid #e0e0e0;
+      border: 2px solid #ddd;
       border-radius: 8px;
       font-size: 16px;
       transition: border-color 0.3s;
     }
 
-    input:focus {
+    input[type="text"]:focus {
       outline: none;
       border-color: #667eea;
     }
@@ -75,276 +65,384 @@
     button {
       width: 100%;
       padding: 12px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #667eea;
       color: white;
       border: none;
       border-radius: 8px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: background 0.3s;
+      margin-bottom: 10px;
     }
 
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      background: #764ba2;
     }
 
-    button:active {
-      transform: translateY(0);
-    }
-
-    button.muted {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    }
-
-    #playersList {
-      list-style: none;
-      margin-top: 20px;
-      padding: 10px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    #playersList li {
-      padding: 10px;
-      margin: 5px 0;
-      background: white;
-      border-left: 4px solid #667eea;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    #myName {
-      color: #667eea;
-      font-size: 14px;
-      margin-bottom: 15px;
-      text-align: center;
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
 
     #status {
-      font-size: 12px;
-      color: #888;
       text-align: center;
-      margin-top: 10px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      color: #333;
+      font-weight: bold;
+      margin-top: 20px;
+      min-height: 30px;
     }
 
-    .button-group {
-      display: flex;
-      gap: 10px;
+    .users-list {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+
+    .users-list h3 {
+      color: #333;
       margin-bottom: 15px;
     }
 
-    .button-group button {
-      flex: 1;
+    .user-item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid #667eea;
+    }
+
+    .user-name {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .call-btn {
+      background: #28a745;
+      padding: 8px 16px;
+      font-size: 14px;
+      width: auto;
+      margin: 0;
+    }
+
+    .call-btn:hover {
+      background: #218838;
+    }
+
+    .call-btn.active {
+      background: #dc3545;
+    }
+
+    .call-btn.active:hover {
+      background: #c82333;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1976d2;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>🎤 Chat Vocal</h1>
-      <p id="status">En attente...</p>
+    <h1>🎤 Voice Chat WebRTC</h1>
+
+    <div class="form-group">
+      <label for="username">Ton Pseudonyme :</label>
+      <input type="text" id="username" placeholder="Ex: Alice" value="">
     </div>
 
-    <div class="content">
-      <!-- ÉCRAN DE CONNEXION -->
-      <div id="joinScreen">
-        <h2 style="margin-bottom: 20px; color: #333;">Rejoins le chat</h2>
-        <div class="input-group">
-          <input 
-            type="text" 
-            id="nameInput" 
-            placeholder="Ton pseudo..." 
-            autocomplete="off"
-          >
-        </div>
-        <button id="joinBtn">Rejoindre 🚀</button>
-      </div>
+    <button onclick="connectToServer()">Se Connecter</button>
+    <button onclick="startVoiceChat()" id="startBtn" disabled>Activer Micro</button>
+    <button onclick="stopVoiceChat()" id="stopBtn" disabled>Désactiver Micro</button>
 
-      <!-- ÉCRAN DU CHAT -->
-      <div id="chatScreen">
-        <div id="myName"></div>
-        
-        <div class="button-group">
-          <button id="muteBtn">🔊 Micro actif</button>
-        </div>
+    <div id="status">En attente...</div>
 
-        <h3 style="margin-bottom: 10px; color: #333;">Joueurs connectés :</h3>
-        <ul id="playersList"></ul>
-      </div>
+    <div class="users-list" id="usersContainer" style="display: none;">
+      <h3>👥 Utilisateurs en ligne :</h3>
+      <div id="usersList"></div>
+    </div>
+
+    <div class="stats" id="stats" style="display: none;">
+      <div>🎤 Micro : <span id="micStatus">Inactif</span></div>
+      <div>📱 Appels actifs : <span id="callCount">0</span></div>
     </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script>
-    const socket = io();
-    let myName = "";
-    let localStream = null;
-    let isMuted = false;
-    const peers = {};
-
+    // ========== CONFIG ==========
     const rtcConfig = {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        },
+        {
+          urls: "turn:openrelay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        }
+      ]
     };
 
-    function joinChat() {
-      const input = document.getElementById("nameInput");
-      const name = input.value.trim();
+    // ========== VARIABLES GLOBALES ==========
+    let socket;
+    let myId;
+    let myUsername;
+    let localStream;
+    let peers = {}; // { userId: RTCPeerConnection }
+    let remoteAudios = {}; // { userId: HTMLAudioElement }
+    const statusEl = document.getElementById("status");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
 
-      if (name === "") {
-        alert("Merci d'entrer un nom !");
+    // ========== CONNEXION SERVEUR ==========
+    function connectToServer() {
+      myUsername = document.getElementById("username").value.trim();
+
+      if (!myUsername) {
+        statusEl.innerText = "❌ Entre un pseudonyme !";
         return;
       }
 
-      myName = name;
+      statusEl.innerText = "⏳ Connexion au serveur...";
 
-      document.getElementById("joinScreen").style.display = "none";
-      document.getElementById("chatScreen").style.display = "block";
-      document.getElementById("myName").innerText = "Tu es connecté en tant que : " + name;
+      socket = io();
 
-      // D'ABORD démarrer le micro, PUIS rejoindre
-      startVoiceChat().then(() => {
-        socket.emit("join", { name: name });
+      socket.on("connect", () => {
+        console.log("✅ Connecté au serveur !");
+        statusEl.innerText = "✅ Connecté !";
+        startBtn.disabled = false;
+        socket.emit("register", { username: myUsername });
+      });
+
+      socket.on("registered", ({ userId }) => {
+        myId = userId;
+        console.log("📝 Enregistré avec l'ID :", myId);
+        statusEl.innerText = "✅ Enregistré - Active ton micro !";
+      });
+
+      socket.on("usersList", ({ users }) => {
+        console.log("👥 Liste des users :", users);
+        updateUsersList(users);
+      });
+
+      socket.on("userJoined", ({ userId, username }) => {
+        console.log(`🟢 ${username} a rejoint !`);
+        statusEl.innerText = `🟢 ${username} a rejoint !`;
+        socket.emit("getUsersList");
+      });
+
+      socket.on("userLeft", ({ userId, username }) => {
+        console.log(`🔴 ${username} s'est déconnecté`);
+        statusEl.innerText = `🔴 ${username} s'est déconnecté`;
+        
+        if (peers[userId]) {
+          peers[userId].close();
+          delete peers[userId];
+        }
+        if (remoteAudios[userId]) {
+          remoteAudios[userId].pause();
+          remoteAudios[userId].srcObject = null;
+          document.body.removeChild(remoteAudios[userId]);
+          delete remoteAudios[userId];
+        }
+        
+        socket.emit("getUsersList");
+      });
+
+      socket.on("signal", async ({ from, data }) => {
+        console.log("📡 Signal reçu de", from, "type:", data.type);
+        
+        let pc = peers[from];
+        
+        if (!pc) {
+          console.log("📞 Pas de peer pour", from, "en création...");
+          pc = createPeerConnection(from);
+        }
+
+        try {
+          if (data.type === "offer") {
+            console.log("📥 OFFER - setRemoteDescription...");
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await pc.createAnswer();
+            console.log("📢 Answer créée");
+            await pc.setLocalDescription(answer);
+            console.log("📤 Envoi answer...");
+            socket.emit("signal", { to: from, data: { type: "answer", answer } });
+          } else if (data.type === "answer") {
+            console.log("📥 ANSWER - setRemoteDescription...");
+            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+            console.log("✅ Connection établie avec", from);
+          } else if (data.type === "candidate") {
+            console.log("❄️ ICE candidate de", from);
+            if (pc.remoteDescription) {
+              await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } else {
+              console.warn("⚠️ RemoteDescription pas encore prêt");
+            }
+          }
+        } catch (err) {
+          console.error("❌ Erreur signal :", err);
+        }
+      });
+
+      socket.on("disconnect", () => {
+        console.log("❌ Déconnecté du serveur");
+        statusEl.innerText = "❌ Déconnecté du serveur";
+        startBtn.disabled = true;
+        stopBtn.disabled = true;
       });
     }
 
-    document.getElementById("joinBtn").addEventListener("click", joinChat);
-    document.getElementById("nameInput").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") joinChat();
-    });
-
-    document.getElementById("muteBtn").addEventListener("click", function() {
-      isMuted = !isMuted;
-      if (localStream) {
-        localStream.getAudioTracks().forEach(track => {
-          track.enabled = !isMuted;
-        });
-      }
-      const btn = document.getElementById("muteBtn");
-      if (isMuted) {
-        btn.innerText = "🔇 Micro coupé";
-        btn.classList.add("muted");
-      } else {
-        btn.innerText = "🔊 Micro actif";
-        btn.classList.remove("muted");
-      }
-    });
-
-    socket.on("playersUpdate", (players) => {
-      const list = document.getElementById("playersList");
-      list.innerHTML = "";
-      players.forEach((p) => {
-        const li = document.createElement("li");
-        li.innerText = "🎮 " + p.name + (p.id === socket.id ? " (toi)" : "");
-        list.appendChild(li);
-      });
-    });
-
-    // === MICRO - PRIORITÉ ===
+    // ========== MICRO ==========
     async function startVoiceChat() {
       const statusEl = document.getElementById("status");
       try {
+        console.log("🎤 Demande d'accès au micro...");
         localStream = await navigator.mediaDevices.getUserMedia({ 
-          audio: { echoCancellation: true, noiseSuppression: true },
+          audio: { 
+            echoCancellation: true, 
+            noiseSuppression: true,
+            autoGainControl: true
+          },
           video: false 
         });
+        console.log("✅ Micro activé ! Tracks :", localStream.getAudioTracks().length);
         statusEl.innerText = "✅ Micro activé";
-        console.log("✅ Micro prêt");
+        document.getElementById("micStatus").innerText = "Actif 🎤";
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
       } catch (err) {
         statusEl.innerText = "❌ Erreur micro : " + err.message;
-        console.error("Erreur micro :", err);
+        console.error("❌ Erreur micro :", err);
         throw err;
       }
     }
 
-    // === WEBRTC ===
+    function stopVoiceChat() {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+        console.log("⏹️ Micro arrêté");
+        statusEl.innerText = "⏹️ Micro arrêté";
+        document.getElementById("micStatus").innerText = "Inactif";
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }
 
+    // ========== WEBRTC ==========
     function createPeerConnection(remoteId) {
+      console.log("🔧 Création PeerConnection pour", remoteId);
       const pc = new RTCPeerConnection(rtcConfig);
 
-      // Ajouter les tracks du micro LOCAL
       if (localStream) {
-        localStream.getAudioTracks().forEach(track => {
-          console.log("➕ Ajout track audio pour", remoteId);
+        console.log("✅ localStream existe, tracks :", localStream.getAudioTracks().length);
+        localStream.getAudioTracks().forEach((track, i) => {
+          console.log("➕ Ajout track audio #" + i + " pour", remoteId);
           pc.addTrack(track, localStream);
         });
       } else {
-        console.error("⚠️ localStream pas prêt pour", remoteId);
+        console.error("❌ localStream n'existe pas !");
       }
 
       pc.onicecandidate = (event) => {
         if (event.candidate) {
+          console.log("❄️ ICE candidate pour", remoteId);
           socket.emit("signal", { to: remoteId, data: { type: "candidate", candidate: event.candidate } });
         }
       };
 
       pc.ontrack = (event) => {
-        console.log("🔊 Audio reçu de", remoteId);
-        let audioEl = document.getElementById("audio-" + remoteId);
-        if (!audioEl) {
-          audioEl = document.createElement("audio");
-          audioEl.id = "audio-" + remoteId;
-          audioEl.autoplay = true;
-          audioEl.playsinline = true;
-          document.body.appendChild(audioEl);
+        console.log("🔊 ONTRACK - Audio reçu de", remoteId);
+        if (!remoteAudios[remoteId]) {
+          const audio = new Audio();
+          audio.srcObject = event.streams[0];
+          audio.play().catch(err => console.warn("Erreur play :", err));
+          document.body.appendChild(audio);
+          remoteAudios[remoteId] = audio;
+          console.log("🔊 Lecteur audio créé pour", remoteId);
         }
-        audioEl.srcObject = event.streams[0];
+      };
+
+      pc.onconnectionstatechange = () => {
+        console.log("🔌 Connection state :", pc.connectionState);
       };
 
       peers[remoteId] = pc;
       return pc;
     }
 
-    socket.on("newPlayer", async ({ id }) => {
-      if (id === socket.id) return;
-      console.log("🆕 Nouveau joueur :", id);
+    async function callUser(userId) {
+      console.log("📞 Appel à", userId);
       
-      const pc = createPeerConnection(id);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      socket.emit("signal", { to: id, data: { type: "offer", offer } });
-    });
+      if (!localStream) {
+        statusEl.innerText = "❌ Active ton micro d'abord !";
+        return;
+      }
 
-    socket.on("signal", async ({ from, data }) => {
-      let pc = peers[from];
-      
+      let pc = peers[userId];
       if (!pc) {
-        console.log("📞 Création peer pour répondre à", from);
-        pc = createPeerConnection(from);
+        pc = createPeerConnection(userId);
       }
 
-      if (data.type === "offer") {
-        console.log("📥 Offer reçue de", from);
-        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        socket.emit("signal", { to: from, data: { type: "answer", answer } });
-      } else if (data.type === "answer") {
-        console.log("📤 Answer reçue de", from);
-        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-      } else if (data.type === "candidate") {
-        if (pc.remoteDescription) {
-          try {
-            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-          } catch (e) {
-            console.error("Erreur ICE:", e);
-          }
-        }
+      try {
+        console.log("📞 Création OFFER pour", userId);
+        const offer = await pc.createOffer({
+          offerToReceiveAudio: true
+        });
+        console.log("📢 Offer créée pour", userId);
+        await pc.setLocalDescription(offer);
+        console.log("📤 Sending offer...");
+        socket.emit("signal", { to: userId, data: { type: "offer", offer } });
+      } catch (err) {
+        console.error("❌ Erreur création offer :", err);
       }
-    });
+    }
 
-    socket.on("playerLeft", ({ id }) => {
-      console.log("👋 Joueur parti :", id);
-      if (peers[id]) {
-        peers[id].close();
-        delete peers[id];
+    // ========== UI ==========
+    function updateUsersList(users) {
+      const container = document.getElementById("usersContainer");
+      const list = document.getElementById("usersList");
+      list.innerHTML = "";
+
+      const otherUsers = users.filter(u => u.id !== myId);
+
+      if (otherUsers.length === 0) {
+        list.innerHTML = "<p style='color: #999;'>Aucun autre utilisateur en ligne</p>";
+        container.style.display = "none";
+        return;
       }
-      const audioEl = document.getElementById("audio-" + id);
-      if (audioEl) audioEl.remove();
-    });
+
+      container.style.display = "block";
+      otherUsers.forEach(user => {
+        const div = document.createElement("div");
+        div.className = "user-item";
+        div.innerHTML = `
+          <span class="user-name">${user.username}</span>
+          <button class="call-btn" onclick="callUser('${user.id}')">Appeler</button>
+        `;
+        list.appendChild(div);
+      });
+
+      document.getElementById("callCount").innerText = Object.keys(peers).length;
+    }
   </script>
 </body>
 </html>
