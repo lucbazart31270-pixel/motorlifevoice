@@ -35,11 +35,16 @@
 
     ws.onopen = () => console.log('Connecté au serveur');
     ws.onmessage = (event) => console.log('Message reçu:', event.data);
+    ws.onerror = (err) => console.log('Erreur WebSocket:', err);
+    ws.onclose = () => console.log('Connexion fermée');
 
     document.getElementById('startBtn').onclick = () => {
+      console.log('Bouton Démarrer cliqué');
       ws.send('start');
     };
+
     document.getElementById('stopBtn').onclick = () => {
+      console.log('Bouton Arrêter cliqué');
       ws.send('stop');
     };
   </script>
