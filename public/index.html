@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Chat WebRTC</title>
+  <title>Voice Chat Proximité + Appels</title>
   <style>
     * {
       margin: 0;
@@ -87,6 +87,7 @@
 
     .btn-danger {
       background: #e74c3c;
+      width: 100%;
     }
 
     .btn-danger:hover {
@@ -95,18 +96,11 @@
 
     .btn-success {
       background: #27ae60;
+      width: 100%;
     }
 
     .btn-success:hover {
       background: #229954;
-    }
-
-    .btn-warning {
-      background: #f39c12;
-    }
-
-    .btn-warning:hover {
-      background: #e67e22;
     }
 
     #status {
@@ -120,56 +114,67 @@
       min-height: 30px;
     }
 
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 15px;
+    .connected {
+      background: #d4edda;
+      color: #155724;
     }
 
-    .controls button {
-      margin-bottom: 0;
+    .error {
+      background: #f8d7da;
+      color: #721c24;
     }
 
     .section {
       margin-top: 30px;
-      padding: 20px;
-      background: #f9f9f9;
-      border-radius: 8px;
-      border-left: 4px solid #667eea;
+      padding-top: 30px;
+      border-top: 2px solid #ddd;
     }
 
-    .section h3 {
+    .section h2 {
+      font-size: 18px;
       color: #333;
       margin-bottom: 15px;
-      font-size: 18px;
+    }
+
+    .users-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
     }
 
     .user-item {
-      background: white;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-left: 4px solid #667eea;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border: 2px solid transparent;
+    }
+
+    .user-item.call-active {
+      background: #d4edda;
+      border-color: #27ae60;
     }
 
     .user-info {
+      display: flex;
+      flex-direction: column;
       flex: 1;
     }
 
     .user-name {
       font-weight: bold;
       color: #333;
-      display: block;
     }
 
     .user-distance {
       font-size: 12px;
       color: #666;
-      margin-top: 5px;
+      margin-top: 3px;
     }
 
     .user-actions {
@@ -178,431 +183,506 @@
     }
 
     .user-actions button {
-      width: auto;
-      padding: 8px 12px;
-      margin-bottom: 0;
-      font-size: 13px;
-    }
-
-    .call-incoming {
-      background: #fff3cd;
-      border-left-color: #f39c12;
-    }
-
-    .call-active {
-      background: #d4edda;
-      border-left-color: #27ae60;
-    }
-
-    .stats {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e3f2fd;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #1976d2;
-    }
-
-    .stats div {
-      margin: 5px 0;
+      padding: 8px 15px;
+      font-size: 12px;
+      margin: 0;
+      min-width: 100px;
     }
 
     .incoming-call {
       position: fixed;
       top: 20px;
       right: 20px;
-      background: #f39c12;
-      color: white;
+      background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       z-index: 1000;
+      animation: slideIn 0.3s ease-in-out;
     }
 
-    .incoming-call button {
-      width: auto;
-      margin: 5px 5px 5px 0;
-      padding: 8px 15px;
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+      }
+      to {
+        transform: translateX(0);
+      }
     }
 
-    .hidden {
-      display: none;
+    .incoming-call h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .call-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .call-buttons button {
+      flex: 1;
+      padding: 10px;
+      margin: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .stat-item {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-item p {
+      color: #666;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .stat-item .number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎤 Voice Chat</h1>
+    <h1>🎤 Voice Chat Proximité</h1>
 
+    <!-- CONNEXION -->
     <div class="form-group">
-      <label for="username">Ton Pseudonyme :</label>
-      <input type="text" id="username" placeholder="Ex: Alice" value="">
+      <label for="username">Ton pseudo :</label>
+      <input type="text" id="username" placeholder="Entre ton nom..." autocomplete="off">
     </div>
 
     <button onclick="connectToServer()">Se Connecter</button>
-    
-    <div class="controls">
-      <button onclick="startVoiceChat()" id="startBtn" disabled>🔊 Micro ON</button>
-      <button onclick="stopVoiceChat()" id="stopBtn" disabled class="btn-danger">🔇 Micro OFF</button>
-    </div>
 
-    <div id="status">En attente...</div>
+    <div id="status">En attente de connexion...</div>
 
     <!-- SECTION PROXIMITÉ -->
-    <div class="section" id="proximitySection" style="display: none;">
-      <h3>📍 Chat de Proximité (Auto)</h3>
-      <div id="nearbyList"></div>
+    <div class="section" id="proximitySection" style="display:none;">
+      <h2>📍 Chat de Proximité (Auto)</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Les appels se font automatiquement si quelqu'un est à moins de 100m.</p>
+      <div id="proximityStatus" style="padding: 10px; background: #f0f0f0; border-radius: 6px; color: #666;">
+        Localisation en cours...
+      </div>
     </div>
 
     <!-- SECTION APPELS MANUELS -->
-    <div class="section" id="callSection" style="display: none;">
-      <h3>📞 Appels Directs (Manuel)</h3>
-      <div id="allUsersList"></div>
+    <div class="section" id="callsSection" style="display:none;">
+      <h2>📞 Appels Directs (Manuel)</h2>
+      <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Appelle qui tu veux, sans limite de distance.</p>
+      <div class="users-list" id="usersList">
+        <p style="color: #999;">Chargement...</p>
+      </div>
     </div>
 
-    <!-- STATISTIQUES -->
-    <div class="stats" id="stats" style="display: none;">
-      <div>🎤 Micro : <span id="micStatus">Inactif</span></div>
-      <div>📍 Position : <span id="posStatus">En attente GPS...</span></div>
-      <div>🔊 Connexions : <span id="callCount">0</span></div>
-      <div>📞 Appels en attente : <span id="incomingCount">0</span></div>
+    <!-- APPEL ENTRANT -->
+    <div id="incomingCallContainer"></div>
+
+    <!-- STATS -->
+    <div class="section" id="statsSection" style="display:none;">
+      <h2>📊 Statistiques</h2>
+      <div class="stats">
+        <div class="stat-item">
+          <p>Appels actifs</p>
+          <div class="number" id="callCount">0</div>
+        </div>
+        <div class="stat-item">
+          <p>Appels entrants</p>
+          <div class="number" id="incomingCount">0</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- NOTIFICATION APPEL ENTRANT -->
-  <div class="incoming-call hidden" id="incomingCallNotif">
-    <div style="font-size: 18px; margin-bottom: 15px;">
-      📞 <span id="callerName"></span> t'appelle !
-    </div>
-    <button onclick="acceptCall()" class="btn-success">Accepter</button>
-    <button onclick="rejectCall()" class="btn-danger">Refuser</button>
-  </div>
-
+  <!-- SOCKET.IO -->
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+  <!-- SIMPLE-PEER -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+
   <script>
-    // ========== CONFIG ==========
-    const rtcConfig = {
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        {
-          urls: "turn:openrelay.metered.ca:80",
-          username: "openrelayproject",
-          credential: "openrelayproject"
-        },
-        {
-          urls: "turn:openrelay.metered.ca:443",
-          username: "openrelayproject",
-          credential: "openrelayproject"
-        }
-      ]
-    };
+    // Variables globales
+    const socket = io();
+    let myId, myUsername, myPosition = null;
+    const peers = {};
+    const incomingCalls = {};
+    const activeCallsWith = new Set();
+    const pendingCalls = {};
+    const usersNearby = {};
+    let allUsers = {};
+    const PROXIMITY_RADIUS = 100; // 100 mètres
 
-    const PROXIMITE_DISTANCE = 100; // 100 mètres
-
-    // ========== VARIABLES GLOBALES ==========
-    let socket;
-    let myId;
-    let myUsername;
-    let myPosition = null;
-    let localStream;
-    let peers = {}; // { userId: RTCPeerConnection }
-    let remoteAudios = {}; // { userId: HTMLAudioElement }
-    let usersNearby = {}; // Chat de proximité
-    let allUsers = {}; // Tous les utilisateurs
-    let incomingCalls = {}; // { userId: { username, from: userId } }
-    let pendingCalls = {}; // Appels en attente
-    let activeCallsWith = new Set(); // Appels actifs
-    
-    const statusEl = document.getElementById("status");
-    const startBtn = document.getElementById("startBtn");
-    const stopBtn = document.getElementById("stopBtn");
-
-    // ========== GEOLOCALISATION ==========
-    function startGeolocation() {
-      console.log("📍 Démarrage géolocalisation...");
+    // CONNEXION SERVEUR
+    function connectToServer() {
+      const username = document.getElementById("username").value.trim();
       
-      if (!navigator.geolocation) {
-        statusEl.innerText = "❌ Géolocalisation non supportée";
+      if (!username) {
+        alert("Entre un pseudo !");
         return;
       }
 
+      if (!navigator.geolocation) {
+        showStatus("❌ Géolocalisation non supportée", "error");
+        return;
+      }
+
+      document.getElementById("username").disabled = true;
+      document.querySelector("button").disabled = true;
+      showStatus("⏳ Connexion en cours...", "");
+
+      // Demander la géolocalisation
       navigator.geolocation.watchPosition(
         (position) => {
           myPosition = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          console.log("✅ Position mise à jour :", myPosition);
-          document.getElementById("posStatus").innerText = 
-            `${myPosition.lat.toFixed(4)}, ${myPosition.lng.toFixed(4)}`;
-          
-          if (socket && socket.connected) {
+
+          // Enregistrer l'utilisateur
+          socket.emit("register", { username });
+          myUsername = username;
+
+          // Envoyer la position au serveur
+          socket.emit("updatePosition", myPosition);
+
+          // Mettre à jour la position toutes les 5 secondes
+          setInterval(() => {
             socket.emit("updatePosition", myPosition);
-          }
+          }, 5000);
+
+          showStatus("✅ Connecté ! Position partagée.", "connected");
+          document.getElementById("proximitySection").style.display = "block";
+          document.getElementById("callsSection").style.display = "block";
+          document.getElementById("statsSection").style.display = "block";
+
+          updateProximityStatus();
         },
         (error) => {
-          console.error("❌ Erreur GPS :", error);
-          statusEl.innerText = "❌ Erreur GPS : " + error.message;
+          showStatus("❌ Impossible d'accéder à ta localisation", "error");
+          console.error(error);
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        }
+        { enableHighAccuracy: true }
       );
     }
 
-    function getDistance(lat1, lng1, lat2, lng2) {
-      const R = 6371000;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLng/2) * Math.sin(dLng/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return Math.round(R * c);
+    // AFFICHER LE STATUS
+    function showStatus(message, className) {
+      const status = document.getElementById("status");
+      status.innerText = message;
+      status.className = className;
     }
 
-    // ========== CONNEXION SERVEUR ==========
-    function connectToServer() {
-      myUsername = document.getElementById("username").value.trim();
+    // GÉOLOCALISATION - CALCULER DISTANCE
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371e3; // Rayon de la Terre en mètres
+      const φ1 = (lat1 * Math.PI) / 180;
+      const φ2 = (lat2 * Math.PI) / 180;
+      const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+      const Δλ = ((lng2 - lng1) * Math.PI) / 180;
 
-      if (!myUsername) {
-        statusEl.innerText = "❌ Entre un pseudonyme !";
-        return;
+      const a =
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c;
+    }
+
+    // ÉVÉNEMENTS SOCKET
+    socket.on("registered", ({ userId }) => {
+      myId = userId;
+      console.log("✅ Enregistré avec l'ID :", myId);
+    });
+
+    socket.on("usersList", ({ users }) => {
+      allUsers = {};
+      users.forEach(user => {
+        allUsers[user.id] = user;
+      });
+      updateAllUsersList();
+    });
+
+    socket.on("userPositionUpdate", ({ userId, username, lat, lng }) => {
+      if (!myPosition || !allUsers[userId]) return;
+
+      const distance = calculateDistance(myPosition.lat, myPosition.lng, lat, lng);
+      const isNearby = distance < PROXIMITY_RADIUS;
+
+      console.log(`📍 ${username} à ${distance.toFixed(1)}m - ${isNearby ? "PROCHE ✅" : "LOIN ❌"}`);
+
+      if (isNearby && !activeCallsWith.has(userId) && !pendingCalls[userId]) {
+        usersNearby[userId] = true;
+        autoCallUser(userId, username);
+      } else if (!isNearby) {
+        usersNearby[userId] = false;
+        if (activeCallsWith.has(userId)) {
+          console.log(`🔴 ${username} s'est éloigné. Déconnexion auto.`);
+          disconnectUser(userId);
+        }
       }
 
-      statusEl.innerText = "⏳ Connexion au serveur...";
-      startGeolocation();
+      updateAllUsersList();
+    });
 
-      socket = io();
+    socket.on("userJoined", ({ userId, username }) => {
+      console.log(`👋 ${username} a rejoint !`);
+      socket.emit("getUsersList");
+    });
 
-      socket.on("connect", () => {
-        console.log("✅ Connecté au serveur !");
-        statusEl.innerText = "✅ Connecté !";
-        startBtn.disabled = false;
-        socket.emit("register", { username: myUsername });
-      });
-
-      socket.on("registered", ({ userId }) => {
-        myId = userId;
-        console.log("📝 Enregistré avec l'ID :", myId);
-        statusEl.innerText = "✅ Enregistré - Active ton micro !";
-        document.getElementById("stats").style.display = "block";
-      });
-
-      socket.on("usersList", ({ users }) => {
-        console.log("👥 Liste reçue :", users);
-        updateAllUsers(users);
-        updateNearbyUsers(users);
-      });
-
-      socket.on("userJoined", ({ userId, username }) => {
-        console.log(`🟢 ${username} a rejoint !`);
-        socket.emit("getUsersList");
-      });
-
-      socket.on("userLeft", ({ userId, username }) => {
-        console.log(`🔴 ${username} s'est déconnecté`);
+    socket.on("userLeft", ({ userId, username }) => {
+      console.log(`👋 ${username} a quitté !`);
+      if (activeCallsWith.has(userId)) {
         disconnectUser(userId);
-        delete allUsers[userId];
-        delete usersNearby[userId];
-        socket.emit("getUsersList");
-      });
-
-      socket.on("userPositionUpdate", ({ userId, username, lat, lng }) => {
-        console.log(`📍 Position de ${username} mise à jour`);
-        
-        if (allUsers[userId]) {
-          allUsers[userId].position = { lat, lng };
-        }
-        
-        if (myPosition) {
-          const distance = getDistance(myPosition.lat, myPosition.lng, lat, lng);
-          
-          if (distance <= PROXIMITE_DISTANCE) {
-            // À proximité
-            if (!usersNearby[userId]) {
-              usersNearby[userId] = { username, lat, lng, distance, type: "proximity" };
-              
-              // Auto-appel si micro est activé
-              if (localStream && !peers[userId]) {
-                console.log(`📞 ${username} à proximité ! Appel auto...`);
-                callUserAuto(userId);
-              }
-            } else {
-              usersNearby[userId].distance = distance;
-            }
-            updateNearbyList();
-          } else {
-            // Plus à proximité
-            if (usersNearby[userId]) {
-              console.log(`📍 ${username} plus à proximité (${distance}m)`);
-              
-              // Ne couper que si c'est un appel AUTO
-              if (usersNearby[userId].type === "proximity") {
-                disconnectUser(userId);
-              }
-              delete usersNearby[userId];
-              updateNearbyList();
-            }
-          }
-        }
-      });
-
-      socket.on("signal", async ({ from, data }) => {
-        console.log("📡 Signal reçu de", from, "type:", data.type);
-        
-        let pc = peers[from];
-        
-        if (!pc) {
-          pc = createPeerConnection(from, false); // false = pas auto
-        }
-
-        try {
-          if (data.type === "offer") {
-            console.log("📥 OFFER reçue");
-            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-            
-            // Vérifier si c'est un appel entrant
-            if (!activeCallsWith.has(from)) {
-              console.log("📞 APPEL ENTRANT de", from);
-              incomingCalls[from] = data.incoming;
-              showIncomingCall(from, data.incomingUsername);
-              updateStats();
-              return; // Attendre la réponse de l'utilisateur
-            }
-            
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            socket.emit("signal", { to: from, data: { type: "answer", answer } });
-          } else if (data.type === "answer") {
-            console.log("📥 ANSWER reçue");
-            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-            activeCallsWith.add(from);
-            console.log("✅ Connection établie avec", from);
-            updateAllUsersList();
-            updateStats();
-          } else if (data.type === "candidate") {
-            if (pc.remoteDescription) {
-              await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-          }
-        } catch (err) {
-          console.error("❌ Erreur signal :", err);
-        }
-      });
-
-      socket.on("disconnect", () => {
-        console.log("❌ Déconnecté du serveur");
-        statusEl.innerText = "❌ Déconnecté du serveur";
-        startBtn.disabled = true;
-        stopBtn.disabled = true;
-      });
-    }
-
-    // ========== MICRO ==========
-    async function startVoiceChat() {
-      try {
-        console.log("🎤 Demande micro...");
-        localStream = await navigator.mediaDevices.getUserMedia({ 
-          audio: { 
-            echoCancellation: true, 
-            noiseSuppression: true,
-            autoGainControl: true
-          },
-          video: false 
-        });
-        console.log("✅ Micro activé !");
-        statusEl.innerText = "✅ Micro activé";
-        document.getElementById("micStatus").innerText = "Actif 🎤";
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
-        
-        // Appeler automatiquement les users à proximité
-        Object.keys(usersNearby).forEach(userId => {
-          if (!peers[userId]) {
-            callUserAuto(userId);
-          }
-        });
-      } catch (err) {
-        statusEl.innerText = "❌ Erreur micro : " + err.message;
-        console.error("❌ Erreur :", err);
       }
-    }
+      usersNearby[userId] = false;
+      updateAllUsersList();
+    });
 
-    function stopVoiceChat() {
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
-        console.log("⏹️ Micro arrêté");
-        statusEl.innerText = "⏹️ Micro arrêté";
-        document.getElementById("micStatus").innerText = "Inactif";
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-        
-        // Couper toutes les connexions
-        Object.keys(peers).forEach(userId => {
-          peers[userId].close();
-          delete peers[userId];
-        });
-        activeCallsWith.clear();
-        updateAllUsersList();
-        updateNearbyList();
-        updateStats();
+    socket.on("signal", ({ from, data }) => {
+      if (!peers[from]) {
+        createPeerConnection(from, false);
       }
-    }
+      peers[from].signal(data);
+    });
 
-    // ========== WEBRTC ==========
-    function createPeerConnection(remoteId, isInitiator = false) {
-      console.log("🔧 Création PeerConnection pour", remoteId, "initiateur:", isInitiator);
-      const pc = new RTCPeerConnection(rtcConfig);
+    socket.on("incomingCall", ({ from, username }) => {
+      if (activeCallsWith.has(from)) return;
+      incomingCalls[from] = { username, timestamp: Date.now() };
+      showIncomingCall(from, username);
+      updateStats();
+    });
 
-      if (localStream) {
-        localStream.getAudioTracks().forEach((track) => {
-          pc.addTrack(track, localStream);
-        });
+    socket.on("callAccepted", ({ from }) => {
+      console.log("✅ L'appel a été accepté par", from);
+      if (peers[from]) {
+        peers[from].isInitiator = false;
       }
+    });
 
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          socket.emit("signal", { to: remoteId, data: { type: "candidate", candidate: event.candidate } });
-        }
-      };
+    socket.on("callRejected", ({ from }) => {
+      console.log("❌ L'appel a été rejeté par", from);
+      if (peers[from]) {
+        peers[from].destroy();
+        delete peers[from];
+      }
+      delete pendingCalls[from];
+      updateAllUsersList();
+    });
 
-      pc.ontrack = (event) => {
-        console.log("🔊 Audio reçu de", remoteId);
-        if (!remoteAudios[remoteId]) {
-          const audio = new Audio();
-          audio.srcObject = event.streams[0];
-          audio.play().catch(err => console.warn("Erreur play :", err));
-          document.body.appendChild(audio);
-          remoteAudios[remoteId] = audio;
-          console.log("🔊 Audio actif pour", remoteId);
-        }
-      };
-
-      pc.onconnectionstatechange = () => {
-        console.log(`📊 État connexion ${remoteId}:`, pc.connectionState);
-        if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
-          disconnectUser(remoteId);
-        }
-      };
-
-      peers[remoteId] = pc;
-      return pc;
-    }
-
-    async function callUserAuto(userId) {
-      console.log("📞 Appel auto à", userId);
-      
-      if (!localStream) {
-        console.warn("❌ Pas de micro !");
+    // CRÉER CONNEXION PEER
+    function createPeerConnection(peerId, initiator) {
+      if (peers[peerId]) {
+        console.log("Connexion déjà existante avec", peerId);
         return;
       }
 
-      let pc = peers[userId];
-      if (!pc) {
-        pc = createPeerConnection(userId,
+      console.log(`🔗 Création connexion avec ${peerId} (initiateur: ${initiator})`);
+
+      const peer = new SimplePeer({
+        initiator,
+        trickleIce: false,
+        stream: null
+      });
+
+      // Obtenir le flux audio/vidéo
+      navigator.mediaDevices
+        .getUserMedia({ audio: true, video: false })
+        .then(stream => {
+          peer.addStream(stream);
+          console.log("🎤 Micro activé");
+        })
+        .catch(err => {
+          console.error("❌ Erreur micro :", err);
+          showStatus("❌ Impossible d'accéder au micro", "error");
+        });
+
+      peer.on("signal", data => {
+        console.log("📤 Envoi signal au serveur");
+        socket.emit("signal", { to: peerId, data });
+      });
+
+      peer.on("stream", stream => {
+        console.log("📥 Stream reçu");
+        const audio = new Audio();
+        audio.srcObject = stream;
+        audio.play().catch(err => console.error("Erreur play:", err));
+      });
+
+      peer.on("error", err => {
+        console.error("Erreur peer :", err);
+        disconnectUser(peerId);
+      });
+
+      peer.on("close", () => {
+        console.log("Connexion fermée avec", peerId);
+        disconnectUser(peerId);
+      });
+
+      peers[peerId] = peer;
+      activeCallsWith.add(peerId);
+      updateAllUsersList();
+      updateStats();
+    }
+
+    // APPEL AUTO (PROXIMITÉ)
+    function autoCallUser(userId, username) {
+      console.log(`📞 Appel auto à ${username}`);
+      pendingCalls[userId] = { type: "auto", timestamp: Date.now() };
+      socket.emit("callUser", { to: userId, username: myUsername, isAuto: true });
+      createPeerConnection(userId, true);
+      updateAllUsersList();
+    }
+
+    // APPEL MANUEL
+    function callUserManual(userId, username) {
+      if (activeCallsWith.has(userId) || pendingCalls[userId]) {
+        return;
+      }
+
+      console.log(`📞 Appel manuel à ${username}`);
+      pendingCalls[userId] = { type: "manual", timestamp: Date.now() };
+      socket.emit("callUser", { to: userId, username: myUsername, isAuto: false });
+      createPeerConnection(userId, true);
+      updateAllUsersList();
+    }
+
+    // AFFICHER APPEL ENTRANT
+    function showIncomingCall(from, username) {
+      const container = document.getElementById("incomingCallContainer");
+      const div = document.createElement("div");
+      div.className = "incoming-call";
+      div.innerHTML = `
+        <h3>📞 ${username} t'appelle !</h3>
+        <div class="call-buttons">
+          <button class="btn-success" onclick="acceptCall('${from}'); this.parentElement.parentElement.remove();">✅ Accepter</button>
+          <button class="btn-danger" onclick="rejectCall('${from}'); this.parentElement.parentElement.remove();">❌ Refuser</button>
+        </div>
+      `;
+      container.appendChild(div);
+
+      setTimeout(() => {
+        if (incomingCalls[from]) {
+          rejectCall(from);
+          if (div.parentElement) div.remove();
+        }
+      }, 30000); // 30 secondes timeout
+    }
+
+    // ACCEPTER UN APPEL
+    function acceptCall(from) {
+      console.log("✅ Accepté l'appel de", from);
+      delete incomingCalls[from];
+      activeCallsWith.add(from);
+      createPeerConnection(from, false);
+      socket.emit("acceptCall", { to: from });
+      updateAllUsersList();
+      updateStats();
+    }
+
+    // REFUSER UN APPEL
+    function rejectCall(from) {
+      console.log("❌ Refusé l'appel de", from);
+      delete incomingCalls[from];
+      socket.emit("rejectCall", { to: from });
+      updateStats();
+    }
+
+    // DÉCONNECTER UN UTILISATEUR
+    function disconnectUser(userId) {
+      if (peers[userId]) {
+        peers[userId].destroy();
+        delete peers[userId];
+      }
+      activeCallsWith.delete(userId);
+      delete pendingCalls[userId];
+      delete incomingCalls[userId];
+      usersNearby[userId] = false;
+      updateAllUsersList();
+      updateStats();
+    }
+
+    // METTRE À JOUR LE STATUS DE PROXIMITÉ
+    function updateProximityStatus() {
+      const status = document.getElementById("proximityStatus");
+      if (!myPosition) {
+        status.innerHTML = "📍 Localisation en cours...";
+        return;
+      }
+
+      const nearbyCount = Object.values(usersNearby).filter(v => v).length;
+      status.innerHTML = `
+        📍 Lat: ${myPosition.lat.toFixed(4)}, Lng: ${myPosition.lng.toFixed(4)}<br>
+        👥 ${nearbyCount} personne(s) à proximité
+      `;
+    }
+
+    // METTRE À JOUR LA LISTE DES UTILISATEURS
+    function updateAllUsersList() {
+      const list = document.getElementById("usersList");
+      const container = document.getElementById("callsSection");
+
+      if (!list) return;
+
+      socket.emit("getUsersList");
+      list.innerHTML = "";
+
+      const otherUsers = Object.values(allUsers).filter(u => u.id !== myId);
+
+      if (otherUsers.length === 0) {
+        list.innerHTML = "<p style='color: #999;'>Aucun utilisateur disponible</p>";
+        return;
+      }
+
+      otherUsers.forEach(user => {
+        const isActive = activeCallsWith.has(user.id);
+        const isPending = pendingCalls[user.id];
+        const isNearby = usersNearby[user.id];
+
+        const div = document.createElement("div");
+        div.className = `user-item ${isActive ? "call-active" : ""}`;
+
+        let button = '';
+        if (isActive) {
+          button = `<button class="btn-danger" onclick="disconnectUser('${user.id}')">Raccrocher</button>`;
+        } else if (isPending) {
+          button = `<button disabled>⏳ En attente...</button>`;
+        } else {
+          button = `<button class="btn-success" onclick="callUserManual('${user.id}', '${user.username}')">📞 Appeler</button>`;
+        }
+
+        div.innerHTML = `
+          <div class="user-info">
+            <span class="user-name">${isActive ? "✅" : ""} ${user.username}</span>
+            <span class="user-distance">${isNearby ? "📍 À proximité (Auto)" : ""}</span>
+          </div>
+          <div class="user-actions">
+            ${button}
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // STATS
+    function updateStats() {
+      const callCount = activeCallsWith.size;
+      const incomingCount = Object.keys(incomingCalls).length;
+      document.getElementById("callCount").innerText = callCount;
+      document.getElementById("incomingCount").innerText = incomingCount;
+    }
+
+    // Mettre à jour la proximité toutes les 2 secondes
+    setInterval(updateProximityStatus, 2000);
+  </script>
+</body>
+</html>
