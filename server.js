@@ -5,42 +5,64 @@ const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: "*" } });
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
+// Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, "public")));
 
-let players = {};
+// Stockage des utilisateurs
+const users = new Map();
 
 io.on("connection", (socket) => {
-  console.log("🔌 Connecté (ID) : " + socket.id);
+  console.log(`✅ Nouvelle connexion : ${socket.id}`);
 
-  socket.on("join", (data) => {
-    players[socket.id] = { name: data.name, id: socket.id };
-    console.log("🎤 Joueur connecté : " + data.name);
+  socket.on("register", ({ username }) => {
+    users.set(socket.id, { id: socket.id, username });
+    console.log(`📝 ${username} enregistré (${socket.id})`);
     
-    // Envoyer la liste à TOUT le monde
-    io.emit("playersUpdate", Object.values(players));
+    socket.emit("registered", { userId: socket.id });
     
-    // Prévenir les autres qu'un nouveau joueur est arrivé
-    socket.broadcast.emit("newPlayer", { id: socket.id });
+    // Notifier les autres
+    socket.broadcast.emit("userJoined", {
+      userId: socket.id,
+      username
+    });
+    
+    // Envoyer la liste complète à tout le monde
+    io.emit("usersList", { users: Array.from(users.values()) });
   });
 
-  // Relais WebRTC : offer
+  socket.on("getUsersList", () => {
+    socket.emit("usersList", { users: Array.from(users.values()) });
+  });
+
   socket.on("signal", ({ to, data }) => {
-    socket.to(to).emit("signal", { from: socket.id, data });
+    console.log(`📡 Signal de ${socket.id} vers ${to} (type: ${data.type})`);
+    io.to(to).emit("signal", { from: socket.id, data });
   });
 
   socket.on("disconnect", () => {
-    if (players[socket.id]) {
-      console.log("❌ Déconnecté : " + players[socket.id].name);
-      delete players[socket.id];
-      io.emit("playersUpdate", Object.values(players));
-      io.emit("playerLeft", { id: socket.id });
+    const user = users.get(socket.id);
+    if (user) {
+      console.log(`🔴 ${user.username} déconnecté`);
+      users.delete(socket.id);
+      
+      socket.broadcast.emit("userLeft", {
+        userId: socket.id,
+        username: user.username
+      });
+      
+      io.emit("usersList", { users: Array.from(users.values()) });
     }
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log("✅ Serveur lancé sur le port " + PORT);
+  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
 });
