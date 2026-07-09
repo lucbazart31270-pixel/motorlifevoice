@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>MotorVoice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding-top: 50px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    #startBtn { background: #4CAF50; color: white; }
+    #stopBtn { background: #f44336; color: white; }
+  </style>
+</head>
+<body>
+  <h1>MotorVoice</h1>
+  <p>Connexion en direct</p>
+  <button id="startBtn">Démarrer</button>
+  <button id="stopBtn">Arrêter</button>
+
+  <script>
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(protocol + '//' + window.location.host);
+
+    ws.onopen = () => console.log('Connecté au serveur');
+    ws.onmessage = (event) => console.log('Message reçu:', event.data);
+
+    document.getElementById('startBtn').onclick = () => {
+      ws.send('start');
+    };
+    document.getElementById('stopBtn').onclick = () => {
+      ws.send('stop');
+    };
+  </script>
+</body>
+</html>
