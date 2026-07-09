@@ -42,6 +42,7 @@
     margin-top: 20px;
     list-style: none;
     padding: 0;
+    min-width: 250px;
   }
   #playersList li {
     background: #2c2c3e;
@@ -56,7 +57,7 @@
 <div id="joinScreen">
   <h1>🎤 Chat Vocal</h1>
   <input type="text" id="nameInput" placeholder="Entre ton nom" maxlength="20"><br>
-  <button onclick="joinChat()">Rejoindre</button>
+  <button id="joinBtn">Rejoindre</button>
 </div>
 
 <div id="chatScreen">
@@ -82,12 +83,38 @@
 
     myName = name;
 
-    // Envoie le nom au serveur
     socket.emit("join", { name: name });
 
-    // On cache l'écran de saisie, on affiche le chat
     document.getElementById("joinScreen").style.display = "none";
     document.getElementById("chatScreen").style.display = "block";
     document.getElementById("myName").innerText = "Tu es connecté en tant que : " + name;
 
-    // Ici plus tard : démarrage
+    startVoiceChat();
+  }
+
+  document.getElementById("joinBtn").addEventListener("click", joinChat);
+
+  document.getElementById("nameInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      joinChat();
+    }
+  });
+
+  socket.on("playersUpdate", (players) => {
+    const list = document.getElementById("playersList");
+    list.innerHTML = "";
+    players.forEach((p) => {
+      const li = document.createElement("li");
+      li.innerText = "🎮 " + p.name;
+      list.appendChild(li);
+    });
+  });
+
+  function startVoiceChat() {
+    console.log("🎙️ Démarrage du chat vocal pour : " + myName);
+    // Le code WebRTC pour le micro viendra ici après
+  }
+</script>
+
+</body>
+</html>
