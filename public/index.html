@@ -253,4 +253,98 @@
         });
         statusEl.innerText = "✅ Micro activé";
         console.log("✅ Micro prêt");
-      } catch (
+      } catch (err) {
+        statusEl.innerText = "❌ Erreur micro : " + err.message;
+        console.error("Erreur micro :", err);
+        throw err;
+      }
+    }
+
+    // === WEBRTC ===
+
+    function createPeerConnection(remoteId) {
+      const pc = new RTCPeerConnection(rtcConfig);
+
+      // Ajouter les tracks du micro LOCAL
+      if (localStream) {
+        localStream.getAudioTracks().forEach(track => {
+          console.log("➕ Ajout track audio pour", remoteId);
+          pc.addTrack(track, localStream);
+        });
+      } else {
+        console.error("⚠️ localStream pas prêt pour", remoteId);
+      }
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit("signal", { to: remoteId, data: { type: "candidate", candidate: event.candidate } });
+        }
+      };
+
+      pc.ontrack = (event) => {
+        console.log("🔊 Audio reçu de", remoteId);
+        let audioEl = document.getElementById("audio-" + remoteId);
+        if (!audioEl) {
+          audioEl = document.createElement("audio");
+          audioEl.id = "audio-" + remoteId;
+          audioEl.autoplay = true;
+          audioEl.playsinline = true;
+          document.body.appendChild(audioEl);
+        }
+        audioEl.srcObject = event.streams[0];
+      };
+
+      peers[remoteId] = pc;
+      return pc;
+    }
+
+    socket.on("newPlayer", async ({ id }) => {
+      if (id === socket.id) return;
+      console.log("🆕 Nouveau joueur :", id);
+      
+      const pc = createPeerConnection(id);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit("signal", { to: id, data: { type: "offer", offer } });
+    });
+
+    socket.on("signal", async ({ from, data }) => {
+      let pc = peers[from];
+      
+      if (!pc) {
+        console.log("📞 Création peer pour répondre à", from);
+        pc = createPeerConnection(from);
+      }
+
+      if (data.type === "offer") {
+        console.log("📥 Offer reçue de", from);
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit("signal", { to: from, data: { type: "answer", answer } });
+      } else if (data.type === "answer") {
+        console.log("📤 Answer reçue de", from);
+        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+      } else if (data.type === "candidate") {
+        if (pc.remoteDescription) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+          } catch (e) {
+            console.error("Erreur ICE:", e);
+          }
+        }
+      }
+    });
+
+    socket.on("playerLeft", ({ id }) => {
+      console.log("👋 Joueur parti :", id);
+      if (peers[id]) {
+        peers[id].close();
+        delete peers[id];
+      }
+      const audioEl = document.getElementById("audio-" + id);
+      if (audioEl) audioEl.remove();
+    });
+  </script>
+</body>
+</html>
