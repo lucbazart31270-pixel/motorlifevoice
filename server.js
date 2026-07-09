@@ -1,48 +1,67 @@
 const express = require("express");
 const http = require("http");
-const socketIo = require("socket.io");
+const socketIO = require("socket.io");
 const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+const io = socketIO(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// Servir les fichiers statiques
 app.use(express.static(path.join(__dirname, "public")));
 
-// Stockage des utilisateurs
 const users = new Map();
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 io.on("connection", (socket) => {
-  console.log(`✅ Nouvelle connexion : ${socket.id}`);
+  console.log("✅ Nouvel utilisateur connecté :", socket.id);
 
   socket.on("register", ({ username }) => {
-    users.set(socket.id, { id: socket.id, username });
-    console.log(`📝 ${username} enregistré (${socket.id})`);
-    
-    socket.emit("registered", { userId: socket.id });
-    
-    // Notifier les autres
-    socket.broadcast.emit("userJoined", {
-      userId: socket.id,
-      username
+    users.set(socket.id, {
+      id: socket.id,
+      username,
+      position: null
     });
-    
-    // Envoyer la liste complète à tout le monde
+    console.log(`📝 ${username} enregistré`);
+    socket.emit("registered", { userId: socket.id });
+    socket.broadcast.emit("userJoined", { userId: socket.id, username });
     io.emit("usersList", { users: Array.from(users.values()) });
+  });
+
+  socket.on("updatePosition", (position) => {
+    const user = users.get(socket.id);
+    if (user) {
+      user.position = position;
+      socket.broadcast.emit("userPositionUpdate", {
+        userId: socket.id,
+        username: user.username,
+        lat: position.lat,
+        lng: position.lng
+      });
+    }
   });
 
   socket.on("getUsersList", () => {
     socket.emit("usersList", { users: Array.from(users.values()) });
   });
 
+  socket.on("callUser", ({ to, username, isAuto }) => {
+    io.to(to).emit("incomingCall", { from: socket.id, username });
+  });
+
+  socket.on("acceptCall", ({ to }) => {
+    io.to(to).emit("callAccepted", { from: socket.id });
+  });
+
+  socket.on("rejectCall", ({ to }) => {
+    io.to(to).emit("callRejected", { from: socket.id });
+  });
+
   socket.on("signal", ({ to, data }) => {
-    console.log(`📡 Signal de ${socket.id} vers ${to} (type: ${data.type})`);
     io.to(to).emit("signal", { from: socket.id, data });
   });
 
@@ -51,12 +70,7 @@ io.on("connection", (socket) => {
     if (user) {
       console.log(`🔴 ${user.username} déconnecté`);
       users.delete(socket.id);
-      
-      socket.broadcast.emit("userLeft", {
-        userId: socket.id,
-        username: user.username
-      });
-      
+      socket.broadcast.emit("userLeft", { userId: socket.id, username: user.username });
       io.emit("usersList", { users: Array.from(users.values()) });
     }
   });
@@ -64,5 +78,5 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
+  console.log(`🚀 Serveur sur http://localhost:${PORT}`);
 });
