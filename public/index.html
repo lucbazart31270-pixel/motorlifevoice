@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Chat Proximité - Premium</title>
+  <title>Voice Chat Proximité - BeamMP</title>
   <style>
     * {
       margin: 0;
@@ -353,7 +353,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎤 VOICE CHAT PROXIMITÉ</h1>
+    <h1>🎤 VOICE CHAT PROXIMITÉ - BEAMMP</h1>
 
     <!-- CONNEXION -->
     <div class="form-group">
@@ -368,9 +368,9 @@
     <!-- SECTION PROXIMITÉ -->
     <div class="section" id="proximitySection" style="display:none;">
       <h2>📍 Chat de Proximité (AUTO)</h2>
-      <p>Les appels se font automatiquement si quelqu'un est à moins de 100m.</p>
+      <p>Les appels se font automatiquement si quelqu'un est à moins de 50m (jeu).</p>
       <div id="proximityStatus">
-        🔍 Localisation en cours...
+        🔍 En attente de la position BeamMP...
       </div>
     </div>
 
@@ -412,16 +412,16 @@
     // Variables globales
     const socket = io();
     let myId, myUsername, myPosition = null;
-    let myLat = 0, myLng = 0;
+    let myX = 0, myY = 0, myZ = 0;
     const peers = {};
     const incomingCalls = {};
     const activeCallsWith = new Set();
     const pendingCalls = {};
     const usersNearby = {};
     let allUsers = {};
-    const PROXIMITY_RADIUS = 100; // 100 mètres
+    const PROXIMITY_RANGE = 50; // 50 mètres en jeu (BeamMP)
 
-    // CONNEXION SERVEUR
+    // CONNEXION SERVEUR (mode web - pas nécessaire si tu utilises uniquement le mod BeamMP)
     function connectToServer() {
       const username = document.getElementById("username").value.trim();
       
@@ -430,56 +430,22 @@
         return;
       }
 
-      if (!navigator.geolocation) {
-        showStatus("❌ Géolocalisation non supportée", "error");
-        return;
-      }
-
       document.getElementById("username").disabled = true;
       document.querySelector("button").disabled = true;
-      showStatus("⏳ Accès à ta localisation...", "");
+      showStatus("⏳ Connexion en cours...", "");
 
-      // Demander la géolocalisation (comme Beam MP)
-      navigator.geolocation.watchPosition(
-        (position) => {
-          myLat = position.coords.latitude;
-          myLng = position.coords.longitude;
-          myPosition = {
-            lat: myLat,
-            lng: myLng
-          };
+      myPosition = { x: 0, y: 0, z: 0 };
+      myX = 0; myY = 0; myZ = 0;
 
-          console.log(`📍 Position récupérée : ${myLat}, ${myLng}`);
+      socket.emit("register", { username, position: myPosition });
+      myUsername = username;
 
-          // Enregistrer l'utilisateur
-          socket.emit("register", { username, position: myPosition });
-          myUsername = username;
+      showStatus("✅ CONNECTÉ ! En attente de la position BeamMP...", "connected");
+      document.getElementById("proximitySection").style.display = "block";
+      document.getElementById("callsSection").style.display = "block";
+      document.getElementById("statsSection").style.display = "block";
 
-          // Envoyer la position au serveur
-          socket.emit("updatePosition", myPosition);
-
-          // Mettre à jour la position toutes les 3 secondes
-          setInterval(() => {
-            socket.emit("updatePosition", myPosition);
-          }, 3000);
-
-          showStatus("✅ CONNECTÉ ! Position active", "connected");
-          document.getElementById("proximitySection").style.display = "block";
-          document.getElementById("callsSection").style.display = "block";
-          document.getElementById("statsSection").style.display = "block";
-
-          updateProximityStatus();
-        },
-        (error) => {
-          showStatus("❌ Localisation refusée ou indisponible", "error");
-          console.error("❌ Erreur géolocalisation :", error);
-        },
-        { 
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
-      );
+      updateProximityStatus();
     }
 
     // AFFICHER LE STATUS
@@ -489,20 +455,12 @@
       status.className = className;
     }
 
-    // CALCULER DISTANCE (Haversine)
-    function calculateDistance(lat1, lng1, lat2, lng2) {
-      const R = 6371e3; // Rayon de la Terre en mètres
-      const φ1 = (lat1 * Math.PI) / 180;
-      const φ2 = (lat2 * Math.PI) / 180;
-      const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-      const Δλ = ((lng2 - lng1) * Math.PI) / 180;
-
-      const a =
-        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-      return R * c;
+    // CALCULER DISTANCE 3D (BeamMP - coordonnées x, y, z)
+    function calculateDistance3D(x1, y1, z1, x2, y2, z2) {
+      const dx = x1 - x2;
+      const dy = y1 - y2;
+      const dz = z1 - z2;
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     // ÉVÉNEMENTS SOCKET
@@ -521,11 +479,24 @@
       updateAllUsersList();
     });
 
-    socket.on("userPositionUpdate", ({ userId, username, lat, lng }) => {
-      if (!myPosition || userId === myId) return;
+    // Mise à jour de MA position (reçue depuis BeamMP via le mod, transmise par le serveur)
+    socket.on("myPositionUpdate", ({ x, y, z }) => {
+      myX = x;
+      myY = y;
+      myZ = z;
+      myPosition = { x, y, z };
+      updateProximityStatus();
+    });
 
-      const distance = calculateDistance(myLat, myLng, lat, lng);
-      const isNearby = distance < PROXIMITY_RADIUS;
+    // Position des autres joueurs mise à jour
+    socket.on("userPositionUpdate", ({ userId, username, x, y, z }) => {
+      if (userId === myId) return;
+
+      // Si ma position n'est pas encore connue (via BeamMP), on ne peut pas calculer
+      if (!myPosition) return;
+
+      const distance = calculateDistance3D(myX, myY, myZ, x, y, z);
+      const isNearby = distance < PROXIMITY_RANGE;
 
       console.log(`📍 ${username} à ${distance.toFixed(1)}m - ${isNearby ? "✅ PROCHE" : "❌ LOIN"}`);
 
@@ -605,7 +576,6 @@
         stream: null
       });
 
-      // Obtenir le flux audio
       navigator.mediaDevices
         .getUserMedia({ audio: true, video: false })
         .then(stream => {
@@ -679,7 +649,6 @@
       `;
       container.appendChild(div);
 
-      // Timeout après 30 secondes
       setTimeout(() => {
         if (incomingCalls[from]) {
           rejectCall(from);
@@ -725,7 +694,7 @@
     function updateProximityStatus() {
       const status = document.getElementById("proximityStatus");
       if (!myPosition) {
-        status.innerHTML = "🔍 Localisation en cours...";
+        status.innerHTML = "🔍 En attente de la position BeamMP...";
         return;
       }
 
@@ -736,9 +705,10 @@
         .join(", ");
 
       status.innerHTML = `
-        <div class="location-icon">📍 POSITION ACTIVE</div>
-        <strong>Latitude:</strong> ${myLat.toFixed(6)}<br>
-        <strong>Longitude:</strong> ${myLng.toFixed(6)}<br>
+        <div class="location-icon">📍 POSITION EN JEU</div>
+        <strong>X:</strong> ${myX.toFixed(1)}<br>
+        <strong>Y:</strong> ${myY.toFixed(1)}<br>
+        <strong>Z:</strong> ${myZ.toFixed(1)}<br>
         👥 <strong>${nearbyCount}</strong> personne(s) à proximité ${nearbyCount > 0 ? "(" + nearbyUsers + ")" : ""}
       `;
     }
@@ -796,7 +766,6 @@
       document.getElementById("incomingCount").innerText = incomingCount;
     }
 
-    // Mettre à jour l'affichage de proximité toutes les 1 secondes
     setInterval(updateProximityStatus, 1000);
   </script>
 </body>
