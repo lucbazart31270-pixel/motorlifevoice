@@ -12,14 +12,14 @@ const io = socketIO(server, {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const users = new Map(); // Utilisateurs connectés via Socket.io (navigateur/site)
-const PROXIMITY_RANGE = 50; // 50 mètres en jeu (ajuste selon tes besoins)
+const users = new Map(); // socket.id -> { username, position, linkId }
+const pendingLinks = new Map(); // linkId -> { name, x, y, z }
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ✅ ROUTE POUR RECEVOIR LES POSITIONS DEPUIS BEAMMP (Lua)
+// ROUTE POUR RECEVOIR LES POSITIONS DEPUIS BEAMMP
 app.post("/api/positions", (req, res) => {
   const { players } = req.body;
 
@@ -28,71 +28,50 @@ app.post("/api/positions", (req, res) => {
   }
 
   players.forEach((player) => {
-    const { playerId, name, x, y, z } = player;
+    const { linkId, name, x, y, z } = player;
 
-    // On enregistre/actualise la position dans notre Map
-    const existing = users.get(playerId);
-    users.set(playerId, {
-      id: playerId,
-      username: name,
-      position: { x, y, z },
-      fromBeamMP: true
-    });
+    pendingLinks.set(linkId, { name, x, y, z });
 
-    // Diffuser la nouvelle position aux clients web connectés
-    io.emit("userPositionUpdate", {
-      userId: playerId,
-      username: name,
-      x, y, z
-    });
+    for (const [socketId, user] of users.entries()) {
+      if (user.linkId === linkId) {
+        user.position = { x, y, z };
+        user.username = name || user.username;
 
-    // Si nouveau joueur, prévenir tout le monde
-    if (!existing) {
-      io.emit("userJoined", { userId: playerId, username: name });
+        io.emit("userPositionUpdate", {
+          userId: socketId,
+          username: user.username,
+          x, y, z
+        });
+      }
     }
   });
-
-  // Mettre à jour la liste globale
-  io.emit("usersList", { users: Array.from(users.values()) });
 
   res.json({ success: true });
 });
 
-// Calcul distance 3D (BeamMP)
-function getDistance3D(pos1, pos2) {
-  const dx = pos1.x - pos2.x;
-  const dy = pos1.y - pos2.y;
-  const dz = pos1.z - pos2.z;
-  return Math.sqrt(dx * dx + dy * dy + dz * dz);
-}
-
 io.on("connection", (socket) => {
   console.log("✅ Nouvel utilisateur connecté :", socket.id);
 
-  socket.on("register", ({ username, position }) => {
+  socket.on("register", ({ username, linkId }) => {
     users.set(socket.id, {
       id: socket.id,
       username,
-      position: position || { x: 0, y: 0, z: 0 }
+      linkId,
+      position: { x: 0, y: 0, z: 0 }
     });
-    console.log(`📝 ${username} enregistré`);
+
+    console.log(`📝 ${username} enregistré avec linkId: ${linkId}`);
     socket.emit("registered", { userId: socket.id });
+
+    if (pendingLinks.has(linkId)) {
+      const pending = pendingLinks.get(linkId);
+      const user = users.get(socket.id);
+      user.position = { x: pending.x, y: pending.y, z: pending.z };
+      socket.emit("myPositionUpdate", pending);
+    }
+
     socket.broadcast.emit("userJoined", { userId: socket.id, username });
     io.emit("usersList", { users: Array.from(users.values()) });
-  });
-
-  socket.on("updatePosition", (position) => {
-    const user = users.get(socket.id);
-    if (user) {
-      user.position = position;
-      socket.broadcast.emit("userPositionUpdate", {
-        userId: socket.id,
-        username: user.username,
-        x: position.x,
-        y: position.y,
-        z: position.z
-      });
-    }
   });
 
   socket.on("getUsersList", () => {
