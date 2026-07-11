@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Chat Proximité + Appels</title>
+  <title>Voice Chat Proximité - Premium</title>
   <style>
     * {
       margin: 0;
@@ -12,29 +12,36 @@
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       padding: 20px;
+      color: #fff;
     }
 
     .container {
-      background: white;
-      border-radius: 15px;
+      background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+      border-radius: 20px;
       padding: 40px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.2);
+      max-width: 700px;
       width: 100%;
+      border: 2px solid #ff0000;
     }
 
     h1 {
       text-align: center;
-      color: #333;
+      background: linear-gradient(135deg, #ff0000, #0066ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 30px;
-      font-size: 28px;
+      font-size: 32px;
+      font-weight: bold;
+      text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
     }
 
     .form-group {
@@ -44,120 +51,183 @@
     label {
       display: block;
       margin-bottom: 8px;
-      color: #555;
+      color: #0066ff;
       font-weight: bold;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
+      padding: 15px;
+      border: 2px solid #0066ff;
+      background: rgba(0, 102, 255, 0.1);
+      border-radius: 10px;
       font-size: 16px;
-      transition: border-color 0.3s;
+      color: #fff;
+      transition: all 0.3s;
     }
 
     input[type="text"]:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #ff0000;
+      background: rgba(255, 0, 0, 0.1);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+
+    input[type="text"]::placeholder {
+      color: #666;
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      background: #667eea;
+      padding: 15px;
+      background: linear-gradient(135deg, #ff0000, #cc0000);
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.3s;
       margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
     }
 
-    button:hover {
-      background: #764ba2;
+    button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #ff3333, #ff0000);
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+      transform: translateY(-2px);
     }
 
     button:disabled {
-      background: #ccc;
+      background: #333;
       cursor: not-allowed;
+      color: #666;
+      box-shadow: none;
     }
 
     .btn-danger {
-      background: #e74c3c;
+      background: linear-gradient(135deg, #ff0000, #cc0000);
       width: 100%;
+      padding: 10px;
+      margin: 0;
     }
 
     .btn-danger:hover {
-      background: #c0392b;
+      background: linear-gradient(135deg, #ff3333, #ff0000);
     }
 
     .btn-success {
-      background: #27ae60;
+      background: linear-gradient(135deg, #0066ff, #0052cc);
       width: 100%;
+      padding: 10px;
+      margin: 0;
     }
 
     .btn-success:hover {
-      background: #229954;
+      background: linear-gradient(135deg, #0080ff, #0066ff);
     }
 
     #status {
       text-align: center;
       padding: 15px;
-      background: #f0f0f0;
-      border-radius: 8px;
-      color: #333;
+      background: rgba(0, 102, 255, 0.2);
+      border: 2px solid #0066ff;
+      border-radius: 10px;
+      color: #0066ff;
       font-weight: bold;
       margin-top: 20px;
       min-height: 30px;
+      font-size: 14px;
+      text-transform: uppercase;
     }
 
-    .connected {
-      background: #d4edda;
-      color: #155724;
+    #status.connected {
+      background: rgba(0, 102, 255, 0.3);
+      border-color: #00ff00;
+      color: #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
     }
 
-    .error {
-      background: #f8d7da;
-      color: #721c24;
+    #status.error {
+      background: rgba(255, 0, 0, 0.2);
+      border-color: #ff0000;
+      color: #ff3333;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
     }
 
     .section {
       margin-top: 30px;
       padding-top: 30px;
-      border-top: 2px solid #ddd;
+      padding: 20px;
+      border: 2px solid #0066ff;
+      border-radius: 10px;
+      background: rgba(0, 102, 255, 0.05);
     }
 
     .section h2 {
       font-size: 18px;
-      color: #333;
+      color: #0066ff;
       margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 2px solid #ff0000;
+      padding-bottom: 10px;
+    }
+
+    .section p {
+      color: #aaa;
+      font-size: 13px;
+      margin-bottom: 10px;
     }
 
     .users-list {
-      max-height: 300px;
+      max-height: 350px;
       overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border: 2px solid #333;
+      border-radius: 10px;
       padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .users-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .users-list::-webkit-scrollbar-track {
+      background: rgba(0, 102, 255, 0.1);
+    }
+
+    .users-list::-webkit-scrollbar-thumb {
+      background: #ff0000;
+      border-radius: 10px;
     }
 
     .user-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
-      background: #f9f9f9;
-      border-radius: 6px;
+      padding: 12px;
+      background: rgba(0, 102, 255, 0.1);
+      border: 2px solid #0066ff;
+      border-radius: 8px;
       margin-bottom: 8px;
-      border: 2px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .user-item:hover {
+      background: rgba(0, 102, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 102, 255, 0.3);
     }
 
     .user-item.call-active {
-      background: #d4edda;
-      border-color: #27ae60;
+      background: rgba(0, 255, 0, 0.15);
+      border-color: #00ff00;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
     }
 
     .user-info {
@@ -168,13 +238,15 @@
 
     .user-name {
       font-weight: bold;
-      color: #333;
+      color: #0066ff;
+      font-size: 14px;
     }
 
     .user-distance {
       font-size: 12px;
-      color: #666;
+      color: #ff0000;
       margin-top: 3px;
+      font-weight: bold;
     }
 
     .user-actions {
@@ -183,36 +255,41 @@
     }
 
     .user-actions button {
-      padding: 8px 15px;
-      font-size: 12px;
+      padding: 8px 12px;
+      font-size: 11px;
       margin: 0;
-      min-width: 100px;
+      min-width: 90px;
     }
 
     .incoming-call {
       position: fixed;
       top: 20px;
       right: 20px;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #1f1f1f, #2a2a2a);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(255, 0, 0, 0.5);
       z-index: 1000;
       animation: slideIn 0.3s ease-in-out;
+      border: 3px solid #ff0000;
     }
 
     @keyframes slideIn {
       from {
         transform: translateX(400px);
+        opacity: 0;
       }
       to {
         transform: translateX(0);
+        opacity: 1;
       }
     }
 
     .incoming-call h3 {
-      margin-bottom: 10px;
-      color: #333;
+      margin-bottom: 15px;
+      color: #ff0000;
+      font-size: 16px;
+      text-transform: uppercase;
     }
 
     .call-buttons {
@@ -222,66 +299,87 @@
 
     .call-buttons button {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       margin: 0;
+      font-size: 12px;
     }
 
     .stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 15px;
       margin-top: 15px;
     }
 
     .stat-item {
-      background: #f0f0f0;
-      padding: 15px;
-      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border: 2px solid #0066ff;
+      border-radius: 10px;
       text-align: center;
     }
 
     .stat-item p {
-      color: #666;
+      color: #0066ff;
       font-size: 12px;
       margin-bottom: 5px;
+      text-transform: uppercase;
+      font-weight: bold;
     }
 
     .stat-item .number {
-      font-size: 24px;
+      font-size: 32px;
       font-weight: bold;
-      color: #667eea;
+      color: #ff0000;
+      text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+
+    #proximityStatus {
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid #ff0000;
+      border-radius: 8px;
+      color: #ff0000;
+      font-weight: bold;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .location-icon {
+      font-size: 20px;
+      margin-right: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎤 Voice Chat Proximité</h1>
+    <h1>🎤 VOICE CHAT PROXIMITÉ</h1>
 
     <!-- CONNEXION -->
     <div class="form-group">
-      <label for="username">Ton pseudo :</label>
+      <label for="username">📝 Ton Pseudo :</label>
       <input type="text" id="username" placeholder="Entre ton nom..." autocomplete="off">
     </div>
 
-    <button onclick="connectToServer()">Se Connecter</button>
+    <button onclick="connectToServer()">🔴 SE CONNECTER</button>
 
-    <div id="status">En attente de connexion...</div>
+    <div id="status">⏳ En attente de connexion...</div>
 
     <!-- SECTION PROXIMITÉ -->
     <div class="section" id="proximitySection" style="display:none;">
-      <h2>📍 Chat de Proximité (Auto)</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Les appels se font automatiquement si quelqu'un est à moins de 100m.</p>
-      <div id="proximityStatus" style="padding: 10px; background: #f0f0f0; border-radius: 6px; color: #666;">
-        Localisation en cours...
+      <h2>📍 Chat de Proximité (AUTO)</h2>
+      <p>Les appels se font automatiquement si quelqu'un est à moins de 100m.</p>
+      <div id="proximityStatus">
+        🔍 Localisation en cours...
       </div>
     </div>
 
     <!-- SECTION APPELS MANUELS -->
     <div class="section" id="callsSection" style="display:none;">
-      <h2>📞 Appels Directs (Manuel)</h2>
-      <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Appelle qui tu veux, sans limite de distance.</p>
+      <h2>📞 Appels Directs (MANUEL)</h2>
+      <p>Appelle qui tu veux, sans limite de distance.</p>
       <div class="users-list" id="usersList">
-        <p style="color: #999;">Chargement...</p>
+        <p style="color: #999; text-align: center;">⏳ Chargement...</p>
       </div>
     </div>
 
@@ -293,11 +391,11 @@
       <h2>📊 Statistiques</h2>
       <div class="stats">
         <div class="stat-item">
-          <p>Appels actifs</p>
+          <p>🟢 Appels Actifs</p>
           <div class="number" id="callCount">0</div>
         </div>
         <div class="stat-item">
-          <p>Appels entrants</p>
+          <p>🔔 Appels Entrants</p>
           <div class="number" id="incomingCount">0</div>
         </div>
       </div>
@@ -314,6 +412,7 @@
     // Variables globales
     const socket = io();
     let myId, myUsername, myPosition = null;
+    let myLat = 0, myLng = 0;
     const peers = {};
     const incomingCalls = {};
     const activeCallsWith = new Set();
@@ -327,7 +426,7 @@
       const username = document.getElementById("username").value.trim();
       
       if (!username) {
-        alert("Entre un pseudo !");
+        alert("❌ Entre un pseudo !");
         return;
       }
 
@@ -338,29 +437,33 @@
 
       document.getElementById("username").disabled = true;
       document.querySelector("button").disabled = true;
-      showStatus("⏳ Connexion en cours...", "");
+      showStatus("⏳ Accès à ta localisation...", "");
 
-      // Demander la géolocalisation
+      // Demander la géolocalisation (comme Beam MP)
       navigator.geolocation.watchPosition(
         (position) => {
+          myLat = position.coords.latitude;
+          myLng = position.coords.longitude;
           myPosition = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lat: myLat,
+            lng: myLng
           };
 
+          console.log(`📍 Position récupérée : ${myLat}, ${myLng}`);
+
           // Enregistrer l'utilisateur
-          socket.emit("register", { username });
+          socket.emit("register", { username, position: myPosition });
           myUsername = username;
 
           // Envoyer la position au serveur
           socket.emit("updatePosition", myPosition);
 
-          // Mettre à jour la position toutes les 5 secondes
+          // Mettre à jour la position toutes les 3 secondes
           setInterval(() => {
             socket.emit("updatePosition", myPosition);
-          }, 5000);
+          }, 3000);
 
-          showStatus("✅ Connecté ! Position partagée.", "connected");
+          showStatus("✅ CONNECTÉ ! Position active", "connected");
           document.getElementById("proximitySection").style.display = "block";
           document.getElementById("callsSection").style.display = "block";
           document.getElementById("statsSection").style.display = "block";
@@ -368,10 +471,14 @@
           updateProximityStatus();
         },
         (error) => {
-          showStatus("❌ Impossible d'accéder à ta localisation", "error");
-          console.error(error);
+          showStatus("❌ Localisation refusée ou indisponible", "error");
+          console.error("❌ Erreur géolocalisation :", error);
         },
-        { enableHighAccuracy: true }
+        { 
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
       );
     }
 
@@ -382,7 +489,7 @@
       status.className = className;
     }
 
-    // GÉOLOCALISATION - CALCULER DISTANCE
+    // CALCULER DISTANCE (Haversine)
     function calculateDistance(lat1, lng1, lat2, lng2) {
       const R = 6371e3; // Rayon de la Terre en mètres
       const φ1 = (lat1 * Math.PI) / 180;
@@ -407,28 +514,31 @@
     socket.on("usersList", ({ users }) => {
       allUsers = {};
       users.forEach(user => {
-        allUsers[user.id] = user;
+        if (user.id !== myId) {
+          allUsers[user.id] = user;
+        }
       });
       updateAllUsersList();
     });
 
     socket.on("userPositionUpdate", ({ userId, username, lat, lng }) => {
-      if (!myPosition || !allUsers[userId]) return;
+      if (!myPosition || userId === myId) return;
 
-      const distance = calculateDistance(myPosition.lat, myPosition.lng, lat, lng);
+      const distance = calculateDistance(myLat, myLng, lat, lng);
       const isNearby = distance < PROXIMITY_RADIUS;
 
-      console.log(`📍 ${username} à ${distance.toFixed(1)}m - ${isNearby ? "PROCHE ✅" : "LOIN ❌"}`);
+      console.log(`📍 ${username} à ${distance.toFixed(1)}m - ${isNearby ? "✅ PROCHE" : "❌ LOIN"}`);
 
       if (isNearby && !activeCallsWith.has(userId) && !pendingCalls[userId]) {
         usersNearby[userId] = true;
+        console.log(`🟢 AUTO-APPEL : ${username}`);
         autoCallUser(userId, username);
       } else if (!isNearby) {
-        usersNearby[userId] = false;
         if (activeCallsWith.has(userId)) {
-          console.log(`🔴 ${username} s'est éloigné. Déconnexion auto.`);
+          console.log(`🔴 ${username} s'est éloigné ! Déconnexion auto.`);
           disconnectUser(userId);
         }
+        usersNearby[userId] = false;
       }
 
       updateAllUsersList();
@@ -440,10 +550,11 @@
     });
 
     socket.on("userLeft", ({ userId, username }) => {
-      console.log(`👋 ${username} a quitté !`);
+      console.log(`🚪 ${username} a quitté !`);
       if (activeCallsWith.has(userId)) {
         disconnectUser(userId);
       }
+      delete allUsers[userId];
       usersNearby[userId] = false;
       updateAllUsersList();
     });
@@ -463,26 +574,26 @@
     });
 
     socket.on("callAccepted", ({ from }) => {
-      console.log("✅ L'appel a été accepté par", from);
-      if (peers[from]) {
-        peers[from].isInitiator = false;
-      }
+      console.log("✅ Appel accepté !", from);
+      delete pendingCalls[from];
     });
 
     socket.on("callRejected", ({ from }) => {
-      console.log("❌ L'appel a été rejeté par", from);
+      console.log("❌ Appel rejeté !", from);
       if (peers[from]) {
         peers[from].destroy();
         delete peers[from];
       }
+      activeCallsWith.delete(from);
       delete pendingCalls[from];
       updateAllUsersList();
+      updateStats();
     });
 
     // CRÉER CONNEXION PEER
     function createPeerConnection(peerId, initiator) {
       if (peers[peerId]) {
-        console.log("Connexion déjà existante avec", peerId);
+        console.log("✅ Connexion déjà existante avec", peerId);
         return;
       }
 
@@ -494,37 +605,36 @@
         stream: null
       });
 
-      // Obtenir le flux audio/vidéo
+      // Obtenir le flux audio
       navigator.mediaDevices
         .getUserMedia({ audio: true, video: false })
         .then(stream => {
           peer.addStream(stream);
-          console.log("🎤 Micro activé");
+          console.log("🎤 Micro activé !");
         })
         .catch(err => {
           console.error("❌ Erreur micro :", err);
-          showStatus("❌ Impossible d'accéder au micro", "error");
+          showStatus("❌ Micro refusé ou indisponible", "error");
         });
 
       peer.on("signal", data => {
-        console.log("📤 Envoi signal au serveur");
         socket.emit("signal", { to: peerId, data });
       });
 
       peer.on("stream", stream => {
-        console.log("📥 Stream reçu");
+        console.log("📥 Stream reçu !");
         const audio = new Audio();
         audio.srcObject = stream;
         audio.play().catch(err => console.error("Erreur play:", err));
       });
 
       peer.on("error", err => {
-        console.error("Erreur peer :", err);
+        console.error("❌ Erreur peer :", err);
         disconnectUser(peerId);
       });
 
       peer.on("close", () => {
-        console.log("Connexion fermée avec", peerId);
+        console.log("🔴 Connexion fermée");
         disconnectUser(peerId);
       });
 
@@ -536,20 +646,19 @@
 
     // APPEL AUTO (PROXIMITÉ)
     function autoCallUser(userId, username) {
-      console.log(`📞 Appel auto à ${username}`);
+      if (activeCallsWith.has(userId) || pendingCalls[userId]) return;
+      
+      console.log(`📞 APPEL AUTO : ${username}`);
       pendingCalls[userId] = { type: "auto", timestamp: Date.now() };
       socket.emit("callUser", { to: userId, username: myUsername, isAuto: true });
       createPeerConnection(userId, true);
-      updateAllUsersList();
     }
 
     // APPEL MANUEL
     function callUserManual(userId, username) {
-      if (activeCallsWith.has(userId) || pendingCalls[userId]) {
-        return;
-      }
+      if (activeCallsWith.has(userId) || pendingCalls[userId]) return;
 
-      console.log(`📞 Appel manuel à ${username}`);
+      console.log(`📞 APPEL MANUEL : ${username}`);
       pendingCalls[userId] = { type: "manual", timestamp: Date.now() };
       socket.emit("callUser", { to: userId, username: myUsername, isAuto: false });
       createPeerConnection(userId, true);
@@ -562,25 +671,26 @@
       const div = document.createElement("div");
       div.className = "incoming-call";
       div.innerHTML = `
-        <h3>📞 ${username} t'appelle !</h3>
+        <h3>📞 ${username} T'APPELLE !</h3>
         <div class="call-buttons">
-          <button class="btn-success" onclick="acceptCall('${from}'); this.parentElement.parentElement.remove();">✅ Accepter</button>
-          <button class="btn-danger" onclick="rejectCall('${from}'); this.parentElement.parentElement.remove();">❌ Refuser</button>
+          <button class="btn-success" onclick="acceptCall('${from}'); this.parentElement.parentElement.remove();">✅ ACCEPTER</button>
+          <button class="btn-danger" onclick="rejectCall('${from}'); this.parentElement.parentElement.remove();">❌ REFUSER</button>
         </div>
       `;
       container.appendChild(div);
 
+      // Timeout après 30 secondes
       setTimeout(() => {
         if (incomingCalls[from]) {
           rejectCall(from);
           if (div.parentElement) div.remove();
         }
-      }, 30000); // 30 secondes timeout
+      }, 30000);
     }
 
     // ACCEPTER UN APPEL
     function acceptCall(from) {
-      console.log("✅ Accepté l'appel de", from);
+      console.log("✅ Appel accepté !");
       delete incomingCalls[from];
       activeCallsWith.add(from);
       createPeerConnection(from, false);
@@ -591,7 +701,7 @@
 
     // REFUSER UN APPEL
     function rejectCall(from) {
-      console.log("❌ Refusé l'appel de", from);
+      console.log("❌ Appel refusé !");
       delete incomingCalls[from];
       socket.emit("rejectCall", { to: from });
       updateStats();
@@ -611,26 +721,31 @@
       updateStats();
     }
 
-    // METTRE À JOUR LE STATUS DE PROXIMITÉ
+    // METTRE À JOUR STATUS PROXIMITÉ
     function updateProximityStatus() {
       const status = document.getElementById("proximityStatus");
       if (!myPosition) {
-        status.innerHTML = "📍 Localisation en cours...";
+        status.innerHTML = "🔍 Localisation en cours...";
         return;
       }
 
       const nearbyCount = Object.values(usersNearby).filter(v => v).length;
+      const nearbyUsers = Object.entries(usersNearby)
+        .filter(([id, nearby]) => nearby)
+        .map(([id]) => allUsers[id]?.username || "?")
+        .join(", ");
+
       status.innerHTML = `
-        📍 Lat: ${myPosition.lat.toFixed(4)}, Lng: ${myPosition.lng.toFixed(4)}<br>
-        👥 ${nearbyCount} personne(s) à proximité
+        <div class="location-icon">📍 POSITION ACTIVE</div>
+        <strong>Latitude:</strong> ${myLat.toFixed(6)}<br>
+        <strong>Longitude:</strong> ${myLng.toFixed(6)}<br>
+        👥 <strong>${nearbyCount}</strong> personne(s) à proximité ${nearbyCount > 0 ? "(" + nearbyUsers + ")" : ""}
       `;
     }
 
     // METTRE À JOUR LA LISTE DES UTILISATEURS
     function updateAllUsersList() {
       const list = document.getElementById("usersList");
-      const container = document.getElementById("callsSection");
-
       if (!list) return;
 
       socket.emit("getUsersList");
@@ -639,7 +754,7 @@
       const otherUsers = Object.values(allUsers).filter(u => u.id !== myId);
 
       if (otherUsers.length === 0) {
-        list.innerHTML = "<p style='color: #999;'>Aucun utilisateur disponible</p>";
+        list.innerHTML = "<p style='color: #999; text-align: center;'>⏳ Aucun utilisateur disponible</p>";
         return;
       }
 
@@ -653,17 +768,17 @@
 
         let button = '';
         if (isActive) {
-          button = `<button class="btn-danger" onclick="disconnectUser('${user.id}')">Raccrocher</button>`;
+          button = `<button class="btn-danger" onclick="disconnectUser('${user.id}')">🔴 RACCROCHER</button>`;
         } else if (isPending) {
-          button = `<button disabled>⏳ En attente...</button>`;
+          button = `<button disabled>⏳ EN ATTENTE...</button>`;
         } else {
-          button = `<button class="btn-success" onclick="callUserManual('${user.id}', '${user.username}')">📞 Appeler</button>`;
+          button = `<button class="btn-success" onclick="callUserManual('${user.id}', '${user.username}')">📞 APPELER</button>`;
         }
 
         div.innerHTML = `
           <div class="user-info">
-            <span class="user-name">${isActive ? "✅" : ""} ${user.username}</span>
-            <span class="user-distance">${isNearby ? "📍 À proximité (Auto)" : ""}</span>
+            <span class="user-name">${isActive ? "✅ " : ""}${user.username}</span>
+            <span class="user-distance">${isNearby ? "📍 À PROXIMITÉ (AUTO)" : ""}</span>
           </div>
           <div class="user-actions">
             ${button}
@@ -673,7 +788,7 @@
       });
     }
 
-    // STATS
+    // METTRE À JOUR LES STATS
     function updateStats() {
       const callCount = activeCallsWith.size;
       const incomingCount = Object.keys(incomingCalls).length;
@@ -681,8 +796,8 @@
       document.getElementById("incomingCount").innerText = incomingCount;
     }
 
-    // Mettre à jour la proximité toutes les 2 secondes
-    setInterval(updateProximityStatus, 2000);
+    // Mettre à jour l'affichage de proximité toutes les 1 secondes
+    setInterval(updateProximityStatus, 1000);
   </script>
 </body>
 </html>
