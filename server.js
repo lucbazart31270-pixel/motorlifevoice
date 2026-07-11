@@ -20,13 +20,13 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("✅ Nouvel utilisateur connecté :", socket.id);
 
-  socket.on("register", ({ username }) => {
+  socket.on("register", ({ username, position }) => {
     users.set(socket.id, {
       id: socket.id,
       username,
-      position: null
+      position: position || { lat: 0, lng: 0 }
     });
-    console.log(`📝 ${username} enregistré`);
+    console.log(`📝 ${username} enregistré avec position [${position?.lat}, ${position?.lng}]`);
     socket.emit("registered", { userId: socket.id });
     socket.broadcast.emit("userJoined", { userId: socket.id, username });
     io.emit("usersList", { users: Array.from(users.values()) });
@@ -50,6 +50,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("callUser", ({ to, username, isAuto }) => {
+    console.log(`📞 Appel ${isAuto ? "AUTO" : "MANUEL"} vers ${to}`);
     io.to(to).emit("incomingCall", { from: socket.id, username });
   });
 
