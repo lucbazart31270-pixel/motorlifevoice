@@ -98,346 +98,243 @@
     }
 
     button:hover:not(:disabled) {
-      background: linear-gradient(135deg, #ff3333, #ff0000);
-      box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
       transform: translateY(-2px);
+      box-shadow: 0 5px 30px rgba(255, 0, 0, 0.6);
     }
 
     button:disabled {
-      background: #333;
+      background: #444;
       cursor: not-allowed;
-      color: #666;
       box-shadow: none;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #00cc44, #009933);
+      box-shadow: 0 0 20px rgba(0, 204, 68, 0.4);
     }
 
     .btn-danger {
       background: linear-gradient(135deg, #ff0000, #cc0000);
-      width: 100%;
-      padding: 10px;
-      margin: 0;
-    }
-
-    .btn-danger:hover {
-      background: linear-gradient(135deg, #ff3333, #ff0000);
-    }
-
-    .btn-success {
-      background: linear-gradient(135deg, #0066ff, #0052cc);
-      width: 100%;
-      padding: 10px;
-      margin: 0;
-    }
-
-    .btn-success:hover {
-      background: linear-gradient(135deg, #0080ff, #0066ff);
     }
 
     #status {
       text-align: center;
       padding: 15px;
-      background: rgba(0, 102, 255, 0.2);
-      border: 2px solid #0066ff;
+      margin: 20px 0;
       border-radius: 10px;
-      color: #0066ff;
       font-weight: bold;
-      margin-top: 20px;
-      min-height: 30px;
-      font-size: 14px;
-      text-transform: uppercase;
+      display: none;
     }
 
     #status.connected {
-      background: rgba(0, 102, 255, 0.3);
-      border-color: #00ff00;
-      color: #00ff00;
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      background: rgba(0, 204, 68, 0.2);
+      border: 2px solid #00cc44;
+      color: #00cc44;
+      display: block;
     }
 
-    #status.error {
-      background: rgba(255, 0, 0, 0.2);
-      border-color: #ff0000;
-      color: #ff3333;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-    }
-
-    .section {
-      margin-top: 30px;
-      padding-top: 30px;
+    #proximitySection, #callsSection, #statsSection {
+      display: none;
+      margin-top: 20px;
       padding: 20px;
-      border: 2px solid #0066ff;
-      border-radius: 10px;
-      background: rgba(0, 102, 255, 0.05);
-    }
-
-    .section h2 {
-      font-size: 18px;
-      color: #0066ff;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border-bottom: 2px solid #ff0000;
-      padding-bottom: 10px;
-    }
-
-    .section p {
-      color: #aaa;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
-    .users-list {
-      max-height: 350px;
-      overflow-y: auto;
-      border: 2px solid #333;
-      border-radius: 10px;
-      padding: 10px;
       background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      border: 1px solid #333;
     }
 
-    .users-list::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .users-list::-webkit-scrollbar-track {
-      background: rgba(0, 102, 255, 0.1);
-    }
-
-    .users-list::-webkit-scrollbar-thumb {
-      background: #ff0000;
-      border-radius: 10px;
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #0066ff;
+      text-transform: uppercase;
     }
 
     .user-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px;
-      background: rgba(0, 102, 255, 0.1);
-      border: 2px solid #0066ff;
-      border-radius: 8px;
-      margin-bottom: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid #333;
       transition: all 0.3s;
     }
 
-    .user-item:hover {
-      background: rgba(0, 102, 255, 0.2);
-      box-shadow: 0 0 15px rgba(0, 102, 255, 0.3);
-    }
-
     .user-item.call-active {
-      background: rgba(0, 255, 0, 0.15);
-      border-color: #00ff00;
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      border-color: #00cc44;
+      background: rgba(0, 204, 68, 0.1);
     }
 
     .user-info {
       display: flex;
       flex-direction: column;
-      flex: 1;
     }
 
     .user-name {
       font-weight: bold;
-      color: #0066ff;
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .user-distance {
       font-size: 12px;
-      color: #ff0000;
+      color: #ff9900;
       margin-top: 3px;
-      font-weight: bold;
-    }
-
-    .user-actions {
-      display: flex;
-      gap: 5px;
     }
 
     .user-actions button {
-      padding: 8px 12px;
-      font-size: 11px;
+      width: auto;
+      padding: 8px 20px;
       margin: 0;
-      min-width: 90px;
+      font-size: 13px;
     }
 
-    .incoming-call {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #1f1f1f, #2a2a2a);
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 10px 40px rgba(255, 0, 0, 0.5);
-      z-index: 1000;
-      animation: slideIn 0.3s ease-in-out;
-      border: 3px solid #ff0000;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    .incoming-call h3 {
-      margin-bottom: 15px;
-      color: #ff0000;
-      font-size: 16px;
-      text-transform: uppercase;
-    }
-
-    .call-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .call-buttons button {
-      flex: 1;
-      padding: 12px;
-      margin: 0;
-      font-size: 12px;
-    }
-
-    .stats {
+    .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
-      margin-top: 15px;
     }
 
-    .stat-item {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      border: 2px solid #0066ff;
+    .stat-box {
+      text-align: center;
+      padding: 15px;
+      background: rgba(0, 102, 255, 0.1);
       border-radius: 10px;
+      border: 1px solid #0066ff;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #0066ff;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .incoming-call {
+      background: rgba(255, 153, 0, 0.2);
+      border: 2px solid #ff9900;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
       text-align: center;
     }
 
-    .stat-item p {
-      color: #0066ff;
-      font-size: 12px;
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      font-weight: bold;
+    .incoming-call-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
     }
 
-    .stat-item .number {
-      font-size: 32px;
-      font-weight: bold;
-      color: #ff0000;
-      text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    .incoming-call-buttons button {
+      margin: 0;
     }
 
-    #proximityStatus {
-      padding: 15px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 2px solid #ff0000;
-      border-radius: 8px;
-      color: #ff0000;
-      font-weight: bold;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
-    .location-icon {
-      font-size: 20px;
-      margin-right: 10px;
+    audio {
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎤 VOICE CHAT PROXIMITÉ - BEAMMP</h1>
+    <h1>🎙️ VOICE PROXIMITÉ</h1>
 
-    <!-- CONNEXION -->
     <div class="form-group">
       <label for="username">📝 Ton Pseudo :</label>
       <input type="text" id="username" placeholder="Entre ton nom..." autocomplete="off">
     </div>
 
+    <div class="form-group">
+      <label for="linkId">🔑 ID BeamMP (affiché en jeu) :</label>
+      <input type="text" id="linkId" placeholder="Ex: A3X9K2" autocomplete="off">
+    </div>
+
     <button onclick="connectToServer()">🔴 SE CONNECTER</button>
 
-    <div id="status">⏳ En attente de connexion...</div>
+    <div id="status"></div>
 
-    <!-- SECTION PROXIMITÉ -->
-    <div class="section" id="proximitySection" style="display:none;">
-      <h2>📍 Chat de Proximité (AUTO)</h2>
-      <p>Les appels se font automatiquement si quelqu'un est à moins de 50m (jeu).</p>
-      <div id="proximityStatus">
-        🔍 En attente de la position BeamMP...
-      </div>
+    <div id="proximitySection">
+      <div class="section-title">📍 Statut Position</div>
+      <p id="positionInfo">En attente de données BeamMP...</p>
     </div>
 
-    <!-- SECTION APPELS MANUELS -->
-    <div class="section" id="callsSection" style="display:none;">
-      <h2>📞 Appels Directs (MANUEL)</h2>
-      <p>Appelle qui tu veux, sans limite de distance.</p>
-      <div class="users-list" id="usersList">
-        <p style="color: #999; text-align: center;">⏳ Chargement...</p>
-      </div>
+    <div id="callsSection">
+      <div class="section-title">👥 Utilisateurs Connectés</div>
+      <div id="incomingCallsList"></div>
+      <div id="usersList"></div>
     </div>
 
-    <!-- APPEL ENTRANT -->
-    <div id="incomingCallContainer"></div>
-
-    <!-- STATS -->
-    <div class="section" id="statsSection" style="display:none;">
-      <h2>📊 Statistiques</h2>
-      <div class="stats">
-        <div class="stat-item">
-          <p>🟢 Appels Actifs</p>
-          <div class="number" id="callCount">0</div>
+    <div id="statsSection">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-number" id="callCount">0</div>
+          <div class="stat-label">Appels Actifs</div>
         </div>
-        <div class="stat-item">
-          <p>🔔 Appels Entrants</p>
-          <div class="number" id="incomingCount">0</div>
+        <div class="stat-box">
+          <div class="stat-number" id="incomingCount">0</div>
+          <div class="stat-label">Appels Entrants</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SOCKET.IO -->
-  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <audio id="localAudio" autoplay muted></audio>
 
-  <!-- SIMPLE-PEER -->
-  <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
-
+  <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Variables globales
     const socket = io();
-    let myId, myUsername, myPosition = null;
-    let myX = 0, myY = 0, myZ = 0;
-    const peers = {};
-    const incomingCalls = {};
-    const activeCallsWith = new Set();
-    const pendingCalls = {};
-    const usersNearby = {};
+    let myUsername = "";
+    let myId = null;
+    let myPosition = { x: 0, y: 0, z: 0 };
     let allUsers = {};
-    const PROXIMITY_RANGE = 50; // 50 mètres en jeu (BeamMP)
+    let usersNearby = {};
+    let activeCallsWith = new Set();
+    let pendingCalls = {};
+    let incomingCalls = {};
+    let peerConnections = {};
+    let localStream = null;
 
-    // CONNEXION SERVEUR (mode web - pas nécessaire si tu utilises uniquement le mod BeamMP)
+    const PROXIMITY_RANGE = 50; // 50 mètres
+
+    const rtcConfig = {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    };
+
+    async function getMicrophone() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        document.getElementById("localAudio").srcObject = localStream;
+      } catch (err) {
+        alert("❌ Impossible d'accéder au microphone : " + err.message);
+      }
+    }
+
     function connectToServer() {
       const username = document.getElementById("username").value.trim();
+      const linkId = document.getElementById("linkId").value.trim();
       
-      if (!username) {
-        alert("❌ Entre un pseudo !");
+      if (!username || !linkId) {
+        alert("❌ Entre un pseudo ET l'ID BeamMP !");
         return;
       }
 
       document.getElementById("username").disabled = true;
+      document.getElementById("linkId").disabled = true;
       document.querySelector("button").disabled = true;
       showStatus("⏳ Connexion en cours...", "");
 
-      myPosition = { x: 0, y: 0, z: 0 };
-      myX = 0; myY = 0; myZ = 0;
+      getMicrophone();
 
-      socket.emit("register", { username, position: myPosition });
+      socket.emit("register", { username, linkId });
       myUsername = username;
 
       showStatus("✅ CONNECTÉ ! En attente de la position BeamMP...", "connected");
@@ -448,277 +345,234 @@
       updateProximityStatus();
     }
 
-    // AFFICHER LE STATUS
     function showStatus(message, className) {
       const status = document.getElementById("status");
       status.innerText = message;
       status.className = className;
+      status.style.display = "block";
     }
 
-    // CALCULER DISTANCE 3D (BeamMP - coordonnées x, y, z)
-    function calculateDistance3D(x1, y1, z1, x2, y2, z2) {
-      const dx = x1 - x2;
-      const dy = y1 - y2;
-      const dz = z1 - z2;
-      return Math.sqrt(dx * dx + dy * dy + dz * dz);
-    }
-
-    // ÉVÉNEMENTS SOCKET
     socket.on("registered", ({ userId }) => {
       myId = userId;
-      console.log("✅ Enregistré avec l'ID :", myId);
+      socket.emit("getUsersList");
+    });
+
+    socket.on("myPositionUpdate", (pos) => {
+      myPosition = { x: pos.x, y: pos.y, z: pos.z };
+      document.getElementById("positionInfo").innerText = 
+        `📍 Position: X=${pos.x.toFixed(1)} Y=${pos.y.toFixed(1)} Z=${pos.z.toFixed(1)}`;
     });
 
     socket.on("usersList", ({ users }) => {
       allUsers = {};
-      users.forEach(user => {
-        if (user.id !== myId) {
-          allUsers[user.id] = user;
-        }
+      users.forEach(u => {
+        allUsers[u.id] = u;
       });
-      updateAllUsersList();
-    });
-
-    // Mise à jour de MA position (reçue depuis BeamMP via le mod, transmise par le serveur)
-    socket.on("myPositionUpdate", ({ x, y, z }) => {
-      myX = x;
-      myY = y;
-      myZ = z;
-      myPosition = { x, y, z };
-      updateProximityStatus();
-    });
-
-    // Position des autres joueurs mise à jour
-    socket.on("userPositionUpdate", ({ userId, username, x, y, z }) => {
-      if (userId === myId) return;
-
-      // Si ma position n'est pas encore connue (via BeamMP), on ne peut pas calculer
-      if (!myPosition) return;
-
-      const distance = calculateDistance3D(myX, myY, myZ, x, y, z);
-      const isNearby = distance < PROXIMITY_RANGE;
-
-      console.log(`📍 ${username} à ${distance.toFixed(1)}m - ${isNearby ? "✅ PROCHE" : "❌ LOIN"}`);
-
-      if (isNearby && !activeCallsWith.has(userId) && !pendingCalls[userId]) {
-        usersNearby[userId] = true;
-        console.log(`🟢 AUTO-APPEL : ${username}`);
-        autoCallUser(userId, username);
-      } else if (!isNearby) {
-        if (activeCallsWith.has(userId)) {
-          console.log(`🔴 ${username} s'est éloigné ! Déconnexion auto.`);
-          disconnectUser(userId);
-        }
-        usersNearby[userId] = false;
-      }
-
-      updateAllUsersList();
+      renderUsersList();
     });
 
     socket.on("userJoined", ({ userId, username }) => {
-      console.log(`👋 ${username} a rejoint !`);
-      socket.emit("getUsersList");
+      allUsers[userId] = { id: userId, username, position: { x: 0, y: 0, z: 0 } };
+      renderUsersList();
     });
 
-    socket.on("userLeft", ({ userId, username }) => {
-      console.log(`🚪 ${username} a quitté !`);
-      if (activeCallsWith.has(userId)) {
-        disconnectUser(userId);
-      }
+    socket.on("userLeft", ({ userId }) => {
       delete allUsers[userId];
-      usersNearby[userId] = false;
-      updateAllUsersList();
-    });
-
-    socket.on("signal", ({ from, data }) => {
-      if (!peers[from]) {
-        createPeerConnection(from, false);
-      }
-      peers[from].signal(data);
-    });
-
-    socket.on("incomingCall", ({ from, username }) => {
-      if (activeCallsWith.has(from)) return;
-      incomingCalls[from] = { username, timestamp: Date.now() };
-      showIncomingCall(from, username);
+      delete usersNearby[userId];
+      activeCallsWith.delete(userId);
+      closeConnection(userId);
+      renderUsersList();
       updateStats();
     });
 
+    socket.on("userPositionUpdate", ({ userId, username, x, y, z }) => {
+      if (allUsers[userId]) {
+        allUsers[userId].position = { x, y, z };
+        allUsers[userId].username = username;
+      }
+      if (userId === myId) {
+        myPosition = { x, y, z };
+        document.getElementById("positionInfo").innerText = 
+          `📍 Position: X=${x.toFixed(1)} Y=${y.toFixed(1)} Z=${z.toFixed(1)}`;
+      }
+      renderUsersList();
+    });
+
+    function calculateDistance(pos1, pos2) {
+      const dx = pos1.x - pos2.x;
+      const dy = pos1.y - pos2.y;
+      const dz = pos1.z - pos2.z;
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    function updateProximityStatus() {
+      if (!myId) return;
+
+      Object.values(allUsers).forEach(user => {
+        if (user.id === myId) return;
+
+        const distance = calculateDistance(myPosition, user.position);
+        const isNearby = distance <= PROXIMITY_RANGE;
+        const wasNearby = usersNearby[user.id];
+
+        if (isNearby && !wasNearby) {
+          usersNearby[user.id] = true;
+          if (!activeCallsWith.has(user.id) && !pendingCalls[user.id]) {
+            autoCallUser(user.id, user.username);
+          }
+        } else if (!isNearby && wasNearby) {
+          delete usersNearby[user.id];
+          if (activeCallsWith.has(user.id)) {
+            disconnectUser(user.id);
+          }
+        }
+      });
+
+      renderUsersList();
+    }
+
+    function autoCallUser(userId, username) {
+      pendingCalls[userId] = true;
+      socket.emit("callUser", { to: userId, username: myUsername, isAuto: true });
+      renderUsersList();
+    }
+
+    function callUserManual(userId, username) {
+      if (activeCallsWith.has(userId)) return;
+      pendingCalls[userId] = true;
+      socket.emit("callUser", { to: userId, username: myUsername, isAuto: false });
+      renderUsersList();
+    }
+
+    socket.on("incomingCall", ({ from, username }) => {
+      incomingCalls[from] = username;
+      renderIncomingCalls();
+      updateStats();
+    });
+
+    function acceptCall(from) {
+      delete incomingCalls[from];
+      activeCallsWith.add(from);
+      socket.emit("acceptCall", { to: from });
+      createPeerConnection(from, true);
+      renderIncomingCalls();
+      renderUsersList();
+      updateStats();
+    }
+
+    function rejectCall(from) {
+      delete incomingCalls[from];
+      socket.emit("rejectCall", { to: from });
+      renderIncomingCalls();
+      updateStats();
+    }
+
     socket.on("callAccepted", ({ from }) => {
-      console.log("✅ Appel accepté !", from);
       delete pendingCalls[from];
+      activeCallsWith.add(from);
+      createPeerConnection(from, false);
+      renderUsersList();
     });
 
     socket.on("callRejected", ({ from }) => {
-      console.log("❌ Appel rejeté !", from);
-      if (peers[from]) {
-        peers[from].destroy();
-        delete peers[from];
-      }
-      activeCallsWith.delete(from);
       delete pendingCalls[from];
-      updateAllUsersList();
-      updateStats();
+      renderUsersList();
     });
 
-    // CRÉER CONNEXION PEER
-    function createPeerConnection(peerId, initiator) {
-      if (peers[peerId]) {
-        console.log("✅ Connexion déjà existante avec", peerId);
-        return;
-      }
+    function createPeerConnection(userId, isInitiator) {
+      const pc = new RTCPeerConnection(rtcConfig);
+      peerConnections[userId] = pc;
 
-      console.log(`🔗 Création connexion avec ${peerId} (initiateur: ${initiator})`);
-
-      const peer = new SimplePeer({
-        initiator,
-        trickleIce: false,
-        stream: null
-      });
-
-      navigator.mediaDevices
-        .getUserMedia({ audio: true, video: false })
-        .then(stream => {
-          peer.addStream(stream);
-          console.log("🎤 Micro activé !");
-        })
-        .catch(err => {
-          console.error("❌ Erreur micro :", err);
-          showStatus("❌ Micro refusé ou indisponible", "error");
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          pc.addTrack(track, localStream);
         });
+      }
 
-      peer.on("signal", data => {
-        socket.emit("signal", { to: peerId, data });
-      });
-
-      peer.on("stream", stream => {
-        console.log("📥 Stream reçu !");
-        const audio = new Audio();
-        audio.srcObject = stream;
-        audio.play().catch(err => console.error("Erreur play:", err));
-      });
-
-      peer.on("error", err => {
-        console.error("❌ Erreur peer :", err);
-        disconnectUser(peerId);
-      });
-
-      peer.on("close", () => {
-        console.log("🔴 Connexion fermée");
-        disconnectUser(peerId);
-      });
-
-      peers[peerId] = peer;
-      activeCallsWith.add(peerId);
-      updateAllUsersList();
-      updateStats();
-    }
-
-    // APPEL AUTO (PROXIMITÉ)
-    function autoCallUser(userId, username) {
-      if (activeCallsWith.has(userId) || pendingCalls[userId]) return;
-      
-      console.log(`📞 APPEL AUTO : ${username}`);
-      pendingCalls[userId] = { type: "auto", timestamp: Date.now() };
-      socket.emit("callUser", { to: userId, username: myUsername, isAuto: true });
-      createPeerConnection(userId, true);
-    }
-
-    // APPEL MANUEL
-    function callUserManual(userId, username) {
-      if (activeCallsWith.has(userId) || pendingCalls[userId]) return;
-
-      console.log(`📞 APPEL MANUEL : ${username}`);
-      pendingCalls[userId] = { type: "manual", timestamp: Date.now() };
-      socket.emit("callUser", { to: userId, username: myUsername, isAuto: false });
-      createPeerConnection(userId, true);
-      updateAllUsersList();
-    }
-
-    // AFFICHER APPEL ENTRANT
-    function showIncomingCall(from, username) {
-      const container = document.getElementById("incomingCallContainer");
-      const div = document.createElement("div");
-      div.className = "incoming-call";
-      div.innerHTML = `
-        <h3>📞 ${username} T'APPELLE !</h3>
-        <div class="call-buttons">
-          <button class="btn-success" onclick="acceptCall('${from}'); this.parentElement.parentElement.remove();">✅ ACCEPTER</button>
-          <button class="btn-danger" onclick="rejectCall('${from}'); this.parentElement.parentElement.remove();">❌ REFUSER</button>
-        </div>
-      `;
-      container.appendChild(div);
-
-      setTimeout(() => {
-        if (incomingCalls[from]) {
-          rejectCall(from);
-          if (div.parentElement) div.remove();
+      pc.ontrack = (event) => {
+        let audioEl = document.getElementById(`audio-${userId}`);
+        if (!audioEl) {
+          audioEl = document.createElement("audio");
+          audioEl.id = `audio-${userId}`;
+          audioEl.autoplay = true;
+          document.body.appendChild(audioEl);
         }
-      }, 30000);
+        audioEl.srcObject = event.streams[0];
+      };
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit("signal", { to: userId, data: { candidate: event.candidate } });
+        }
+      };
+
+      if (isInitiator) {
+        pc.createOffer().then(offer => {
+          pc.setLocalDescription(offer);
+          socket.emit("signal", { to: userId, data: { sdp: offer } });
+        });
+      }
     }
 
-    // ACCEPTER UN APPEL
-    function acceptCall(from) {
-      console.log("✅ Appel accepté !");
-      delete incomingCalls[from];
-      activeCallsWith.add(from);
-      createPeerConnection(from, false);
-      socket.emit("acceptCall", { to: from });
-      updateAllUsersList();
-      updateStats();
-    }
+    socket.on("signal", async ({ from, data }) => {
+      let pc = peerConnections[from];
+      if (!pc) {
+        createPeerConnection(from, false);
+        pc = peerConnections[from];
+      }
 
-    // REFUSER UN APPEL
-    function rejectCall(from) {
-      console.log("❌ Appel refusé !");
-      delete incomingCalls[from];
-      socket.emit("rejectCall", { to: from });
-      updateStats();
-    }
+      if (data.sdp) {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+        if (data.sdp.type === "offer") {
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          socket.emit("signal", { to: from, data: { sdp: answer } });
+        }
+      } else if (data.candidate) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch (err) {
+          console.error("Erreur ICE candidate:", err);
+        }
+      }
+    });
 
-    // DÉCONNECTER UN UTILISATEUR
     function disconnectUser(userId) {
-      if (peers[userId]) {
-        peers[userId].destroy();
-        delete peers[userId];
-      }
       activeCallsWith.delete(userId);
-      delete pendingCalls[userId];
-      delete incomingCalls[userId];
-      usersNearby[userId] = false;
-      updateAllUsersList();
+      closeConnection(userId);
+      renderUsersList();
       updateStats();
     }
 
-    // METTRE À JOUR STATUS PROXIMITÉ
-    function updateProximityStatus() {
-      const status = document.getElementById("proximityStatus");
-      if (!myPosition) {
-        status.innerHTML = "🔍 En attente de la position BeamMP...";
-        return;
+    function closeConnection(userId) {
+      if (peerConnections[userId]) {
+        peerConnections[userId].close();
+        delete peerConnections[userId];
       }
-
-      const nearbyCount = Object.values(usersNearby).filter(v => v).length;
-      const nearbyUsers = Object.entries(usersNearby)
-        .filter(([id, nearby]) => nearby)
-        .map(([id]) => allUsers[id]?.username || "?")
-        .join(", ");
-
-      status.innerHTML = `
-        <div class="location-icon">📍 POSITION EN JEU</div>
-        <strong>X:</strong> ${myX.toFixed(1)}<br>
-        <strong>Y:</strong> ${myY.toFixed(1)}<br>
-        <strong>Z:</strong> ${myZ.toFixed(1)}<br>
-        👥 <strong>${nearbyCount}</strong> personne(s) à proximité ${nearbyCount > 0 ? "(" + nearbyUsers + ")" : ""}
-      `;
+      const audioEl = document.getElementById(`audio-${userId}`);
+      if (audioEl) audioEl.remove();
     }
 
-    // METTRE À JOUR LA LISTE DES UTILISATEURS
-    function updateAllUsersList() {
-      const list = document.getElementById("usersList");
-      if (!list) return;
+    function renderIncomingCalls() {
+      const container = document.getElementById("incomingCallsList");
+      container.innerHTML = "";
 
-      socket.emit("getUsersList");
+      Object.entries(incomingCalls).forEach(([from, username]) => {
+        const div = document.createElement("div");
+        div.className = "incoming-call";
+        div.innerHTML = `
+          <p>📞 <strong>${username}</strong> t'appelle...</p>
+          <div class="incoming-call-buttons">
+            <button class="btn-success" onclick="acceptCall('${from}')">✅ ACCEPTER</button>
+            <button class="btn-danger" onclick="rejectCall('${from}')">❌ REFUSER</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderUsersList() {
+      const list = document.getElementById("usersList");
       list.innerHTML = "";
 
       const otherUsers = Object.values(allUsers).filter(u => u.id !== myId);
@@ -758,7 +612,6 @@
       });
     }
 
-    // METTRE À JOUR LES STATS
     function updateStats() {
       const callCount = activeCallsWith.size;
       const incomingCount = Object.keys(incomingCalls).length;
